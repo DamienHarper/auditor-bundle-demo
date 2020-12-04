@@ -1,0 +1,6 @@
+dh_auditor:
+  enabled: true
+  providers:
+    doctrine:
+      table_prefix: ~
+      table_suffix: '_audit'
