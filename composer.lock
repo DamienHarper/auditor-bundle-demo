@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1e5562644a0b76afa0f720611bcd4998",
+    "content-hash": "93ac91775d96cc062ee0d6cd7e23e8c4",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -130,21 +130,21 @@
         },
         {
             "name": "damienharper/auditor",
-            "version": "dev-master",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DamienHarper/auditor.git",
-                "reference": "d2681b384d28491b7abcea82af9176c627da701e"
+                "reference": "d55d484ba65847064ee28c48fe236bd879f01391"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DamienHarper/auditor/zipball/d2681b384d28491b7abcea82af9176c627da701e",
-                "reference": "d2681b384d28491b7abcea82af9176c627da701e",
+                "url": "https://api.github.com/repos/DamienHarper/auditor/zipball/d55d484ba65847064ee28c48fe236bd879f01391",
+                "reference": "d55d484ba65847064ee28c48fe236bd879f01391",
                 "shasum": ""
             },
             "require": {
                 "doctrine/annotations": "^1.8",
-                "doctrine/orm": "^2.8",
+                "doctrine/orm": "^2.7",
                 "php": ">=7.2",
                 "symfony/event-dispatcher": "^3.4|^4.0|^5.0",
                 "symfony/lock": "^3.4|^4.0|^5.0",
@@ -168,7 +168,6 @@
             "suggest": {
                 "damienharper/auditor-bundle": "Integrate auditor library in your Symfony projects."
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -199,29 +198,29 @@
             ],
             "support": {
                 "issues": "https://github.com/DamienHarper/auditor/issues",
-                "source": "https://github.com/DamienHarper/auditor/tree/master"
+                "source": "https://github.com/DamienHarper/auditor/tree/1.0.0"
             },
-            "time": "2020-12-04T22:04:47+00:00"
+            "time": "2020-12-06T16:20:22+00:00"
         },
         {
             "name": "damienharper/auditor-bundle",
-            "version": "dev-master",
+            "version": "4.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DamienHarper/auditor-bundle.git",
-                "reference": "f0f6f1a2a391c416166781af1878676f7849d07d"
+                "reference": "e2aa0f3beee1049c6e99ea963f7f357c1c35e897"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DamienHarper/auditor-bundle/zipball/f0f6f1a2a391c416166781af1878676f7849d07d",
-                "reference": "f0f6f1a2a391c416166781af1878676f7849d07d",
+                "url": "https://api.github.com/repos/DamienHarper/auditor-bundle/zipball/e2aa0f3beee1049c6e99ea963f7f357c1c35e897",
+                "reference": "e2aa0f3beee1049c6e99ea963f7f357c1c35e897",
                 "shasum": ""
             },
             "require": {
-                "damienharper/auditor": "dev-master",
+                "damienharper/auditor": "^1.0",
                 "doctrine/annotations": "^1.8",
                 "doctrine/doctrine-bundle": "^1.9|^2.0",
-                "doctrine/orm": "^2.8",
+                "doctrine/orm": "^2.7",
                 "php": ">=7.2",
                 "symfony/event-dispatcher": "^3.4|^4.0|^5.0",
                 "symfony/lock": "^3.4|^4.0|^5.0",
@@ -249,7 +248,6 @@
                 "symfony/var-dumper": "^3.4|^4.0|^5.0",
                 "twig/extensions": "^1.5"
             },
-            "default-branch": true,
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
@@ -281,9 +279,9 @@
             ],
             "support": {
                 "issues": "https://github.com/DamienHarper/auditor-bundle/issues",
-                "source": "https://github.com/DamienHarper/auditor-bundle/tree/master"
+                "source": "https://github.com/DamienHarper/auditor-bundle/tree/4.0.2"
             },
-            "time": "2020-12-04T15:25:20+00:00"
+            "time": "2020-12-08T14:48:58+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -731,16 +729,16 @@
         },
         {
             "name": "doctrine/doctrine-bundle",
-            "version": "2.2.1",
+            "version": "2.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineBundle.git",
-                "reference": "9e07bb1ff35d35d9ec4597b79e5d05502d7d4d43"
+                "reference": "044d33eeffdb236d5013b6b4af99f87519e10751"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrineBundle/zipball/9e07bb1ff35d35d9ec4597b79e5d05502d7d4d43",
-                "reference": "9e07bb1ff35d35d9ec4597b79e5d05502d7d4d43",
+                "url": "https://api.github.com/repos/doctrine/DoctrineBundle/zipball/044d33eeffdb236d5013b6b4af99f87519e10751",
+                "reference": "044d33eeffdb236d5013b6b4af99f87519e10751",
                 "shasum": ""
             },
             "require": {
@@ -764,7 +762,7 @@
                 "doctrine/coding-standard": "^8.0",
                 "doctrine/orm": "^2.6",
                 "ocramius/proxy-manager": "^2.1",
-                "phpunit/phpunit": "^7.5 || ^9.3",
+                "phpunit/phpunit": "^7.5 || ^8.0 || ^9.3",
                 "symfony/phpunit-bridge": "^4.2",
                 "symfony/property-info": "^4.3.3|^5.0",
                 "symfony/proxy-manager-bridge": "^3.4|^4.3.3|^5.0",
@@ -821,7 +819,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/DoctrineBundle/issues",
-                "source": "https://github.com/doctrine/DoctrineBundle/tree/2.2.1"
+                "source": "https://github.com/doctrine/DoctrineBundle/tree/2.2.2"
             },
             "funding": [
                 {
@@ -837,7 +835,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-11-10T20:42:15+00:00"
+            "time": "2020-12-05T15:07:10+00:00"
         },
         {
             "name": "doctrine/doctrine-migrations-bundle",
@@ -6071,9 +6069,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "damienharper/auditor-bundle": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
