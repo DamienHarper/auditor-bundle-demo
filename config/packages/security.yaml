@@ -7,8 +7,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            anonymous: true
-            lazy: true
+            anonymous: lazy
             provider: users_in_memory
 
             # activate different ways to authenticate
