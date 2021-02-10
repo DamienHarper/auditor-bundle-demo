@@ -4,3 +4,5 @@ dh_auditor:
     doctrine:
       table_prefix: ~
       table_suffix: '_audit'
+      storage_services:
+        - '@doctrine.orm.audits_entity_manager'
