@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ba54ed3e4348ab0fefd105197f6565e9",
+    "content-hash": "21e5ae094d13f5335438da2bf336af8f",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -130,16 +130,16 @@
         },
         {
             "name": "damienharper/auditor",
-            "version": "1.1.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DamienHarper/auditor.git",
-                "reference": "04a6a1e0a2300734e7990030f031a0737b6a817b"
+                "reference": "297c37ab27ccf14e872996a8b41a8d01077cb342"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DamienHarper/auditor/zipball/04a6a1e0a2300734e7990030f031a0737b6a817b",
-                "reference": "04a6a1e0a2300734e7990030f031a0737b6a817b",
+                "url": "https://api.github.com/repos/DamienHarper/auditor/zipball/297c37ab27ccf14e872996a8b41a8d01077cb342",
+                "reference": "297c37ab27ccf14e872996a8b41a8d01077cb342",
                 "shasum": ""
             },
             "require": {
@@ -168,6 +168,7 @@
             "suggest": {
                 "damienharper/auditor-bundle": "Integrate auditor library in your Symfony projects."
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -198,9 +199,9 @@
             ],
             "support": {
                 "issues": "https://github.com/DamienHarper/auditor/issues",
-                "source": "https://github.com/DamienHarper/auditor/tree/1.1.0"
+                "source": "https://github.com/DamienHarper/auditor/tree/master"
             },
-            "time": "2021-02-10T17:18:14+00:00"
+            "time": "2021-02-27T08:51:41+00:00"
         },
         {
             "name": "damienharper/auditor-bundle",
@@ -6367,7 +6368,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "damienharper/auditor": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
