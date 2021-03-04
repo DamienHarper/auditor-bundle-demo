@@ -1,0 +1,45 @@
+{% extends "base.html.twig" %}
+
+{% set title = "Author index" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<h1>{{ title }}</h1>
+
+{% for flashMessage in app.session.flashbag.get('lifecycleevent.message') %}
+<div class="alert alert-primary" role="alert">{{ flashMessage }}</div>
+{% endfor %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Fullname</th>
+            <th>Email</th>
+            <th>actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for author in authors %}
+        <tr>
+            <td>{{ author.id }}</td>
+            <td>{{ author.fullname }}</td>
+            <td>{{ author.email }}</td>
+            <td>
+                <a class="btn btn-link" href="{{ path('author_show', {'id': author.id}) }}">view</a>
+                <a class="btn btn-primary" href="{{ path('author_edit', {'id': author.id}) }}">edit</a>
+                <a class="btn btn-secondary" href="{{ path('dh_auditor_show_entity_history', {'entity': 'App-Entity-Author', 'id': author.id}) }}">audits</a>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="6">no author found</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<a class="btn btn-primary" href="{{ path('author_new') }}">New author</a>
+
+<a class="btn btn-secondary" href="{{ path('dh_auditor_show_entity_history', {'entity': 'App-Entity-Author'}) }}">Author audits</a>
+{% endblock %}
