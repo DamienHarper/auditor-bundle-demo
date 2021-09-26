@@ -5,5 +5,7 @@ dh_auditor:
       viewer: true
       table_prefix: ~
       table_suffix: '_audit'
-#      storage_services:
-#        - '@doctrine.orm.audits_entity_manager'
+      storage_mapper: App\Service\MyStorageMapper::map
+      storage_services:
+        - '@doctrine.orm.default_entity_manager'
+        - '@doctrine.orm.audits_entity_manager'
