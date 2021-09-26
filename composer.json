@@ -13,13 +13,13 @@
         "damienharper/auditor-bundle": "dev-master",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "gedmo/doctrine-extensions": "^3.0",
-        "sensio/framework-extra-bundle": "^6.1",
         "symfony/console": "*",
         "symfony/dotenv": "*",
         "symfony/flex": "^1.3.1",
         "symfony/form": "*",
         "symfony/framework-bundle": "*",
         "symfony/monolog-bundle": "^3.7",
+        "symfony/runtime": "5.3.*",
         "symfony/stopwatch": "*",
         "symfony/twig-bundle": "*",
         "symfony/web-profiler-bundle": "*",
@@ -60,7 +60,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "5.2.*"
+            "require": "5.3.*"
         }
     },
     "require-dev": {
