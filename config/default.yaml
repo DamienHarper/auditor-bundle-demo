@@ -1,0 +1,10 @@
+#doctrine_migrations:
+#migrations_directory: 'migrations/default'
+#migrations_namespace: DefaultDoctrineMigrations
+#table_name: migration_versions
+#name: Default Migrations
+table_storage:
+  table_name: migration_versions
+migrations_paths:
+  'DefaultDoctrineMigrations': 'migrations/default'
+organize_migrations: year

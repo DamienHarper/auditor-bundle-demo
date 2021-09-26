@@ -1,0 +1,9 @@
+#migrations_directory: '/Users/damienharper/Projects/personal/auditor-bundle-demo/migrations/audits'
+#migrations_namespace: AuditsDoctrineMigrations
+#table_name: migration_versions
+#name: Audits Migrations
+table_storage:
+  table_name: migration_versions
+migrations_paths:
+  'DefaultDoctrineMigrations': 'migrations/audits'
+organize_migrations: year
