@@ -1,4 +1,16 @@
-/.idea/
+.idea/
+cache/
+node_modules/
+var/
+vendor/
+tests/coverage/
+.DS_Store
+.php_cs.cache
+.php-cs-fixer.cache
+.phpunit.result.cache
+composer.lock
+*.sqlite
+.preload.php
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -9,3 +21,8 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###

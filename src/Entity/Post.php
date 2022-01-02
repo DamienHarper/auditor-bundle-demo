@@ -63,6 +63,12 @@ class Post
     protected $author;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Author", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="coauthor_id", referencedColumnName="id", nullable=true)
+     */
+    protected $coauthor;
+
+    /**
      * @ORM\ManyToMany(targetEntity="Tag", inversedBy="posts", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="post__tag",
      *     joinColumns={@ORM\JoinColumn(name="post_id", referencedColumnName="id", nullable=false)},
@@ -251,6 +257,20 @@ class Post
     }
 
     /**
+     * Set Author entity (many to one).
+     *
+     * @param ?Author $author
+     *
+     * @return Post
+     */
+    public function setCoauthor(?Author $author): self
+    {
+        $this->coauthor = $author;
+
+        return $this;
+    }
+
+    /**
      * Get Author entity (many to one).
      *
      * @return ?Author
@@ -258,6 +278,16 @@ class Post
     public function getAuthor(): ?Author
     {
         return $this->author;
+    }
+
+    /**
+     * Get Author entity (many to one).
+     *
+     * @return ?Author
+     */
+    public function getCoauthor(): ?Author
+    {
+        return $this->coauthor;
     }
 
     /**

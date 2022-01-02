@@ -14,6 +14,8 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        // START TRANSACTION #1
+
         // Authors
         $author1 = new Author();
         $author1
@@ -117,20 +119,37 @@ class AppFixtures extends Fixture
 
         $manager->flush();
 
+        // END TRANSACTION #1
+
+        // START TRANSACTION #2
+
         // Updates
         $author1->setFullname('John Doe');
         $manager->persist($author1);
         $manager->flush();
 
+        // END TRANSACTION #2
+
+        // START TRANSACTION #3
+
         // Association author<->post
-        $author1
-            ->addPost($post1)
-            ->addPost($post2)
-        ;
-        $manager->persist($author1);
+//        $author1
+//            ->addPost($post1)
+//            ->addPost($post2)
+//        ;
+//        $manager->persist($author1);
+        $post1->setAuthor($author1);
+        $post2->setAuthor($author1);
+        $manager->persist($post1);
 
         $author2->addPost($post3);
         $manager->persist($author2);
+
+        $post1->setCoauthor($author2);
+        $manager->persist($post1);
+
+        $post3->setCoauthor($author3);
+        $manager->persist($post3);
 
         $author3->addPost($post4);
         $manager->persist($author3);
@@ -146,6 +165,9 @@ class AppFixtures extends Fixture
         $manager->persist($post3);
 
         $manager->flush();
+        // END TRANSACTION #3
+
+        // START TRANSACTION #4
 
         // Association post<->tag
         $post1
@@ -163,17 +185,22 @@ class AppFixtures extends Fixture
             ->addTag($tag5)
         ;
         $manager->flush();
+        // END TRANSACTION #4
+
+        // START TRANSACTION #5
 
         // Dissociation post<->tag
         $post4
             ->removeTag($tag4)
             ->removeTag($tag5)
         ;
-        $manager->flush();
 
         // Dissociation author<->post
         $author3->removePost($post4);
-        $manager->flush();
+
+        // Dissociation coauthor<->post
+        $author3->removePost($post4);
+        $post3->setCoauthor(null);
 
         // Delete author
         $manager->detach($author3);
@@ -181,5 +208,6 @@ class AppFixtures extends Fixture
         $manager->remove($author3);
 
         $manager->flush();
+        // END TRANSACTION #5
     }
 }

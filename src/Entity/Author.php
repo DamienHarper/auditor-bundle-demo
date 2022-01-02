@@ -33,10 +33,16 @@ class Author
     protected $email;
 
     /**
-     * @ORM\OneToMany(targetEntity="Post", mappedBy="author", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Post", mappedBy="author", cascade={"persist"})
      * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=false)
      */
     protected $posts;
+
+//    /**
+//     * @ORM\OneToMany(targetEntity="Post", mappedBy="coauthor", cascade={"persist"})
+//     * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=false)
+//     */
+//    protected $coauthoredPosts;
 
     public function __construct()
     {
@@ -153,6 +159,45 @@ class Author
     {
         return $this->posts;
     }
+
+//    /**
+//     * Add Post entity to collection (one to many).
+//     *
+//     * @param Post $post
+//     *
+//     * @return Author
+//     */
+//    public function addCoauthoredPost(Post $post): self
+//    {
+//        $this->coauthoredPosts[] = $post;
+//
+//        return $this;
+//    }
+//
+//    /**
+//     * Remove Post entity from collection (one to many).
+//     *
+//     * @param Post $post
+//     *
+//     * @return Author
+//     */
+//    public function removeCoauthoredPost(Post $post): self
+//    {
+//        $this->coauthoredPosts->removeElement($post);
+//        $post->setAuthor(null);
+//
+//        return $this;
+//    }
+//
+//    /**
+//     * Get Post entity collection (one to many).
+//     *
+//     * @return Collection
+//     */
+//    public function getCoauthoredPosts(): Collection
+//    {
+//        return $this->coauthoredPosts;
+//    }
 
     public function __toString(): string
     {
