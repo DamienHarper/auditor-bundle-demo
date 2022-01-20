@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\Author;
 use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\Tag;
-use DateTime;
+use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -43,7 +45,7 @@ class AppFixtures extends Fixture
         $post1
             ->setTitle('First post')
             ->setBody('Here is the body of the first post')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($post1);
 
@@ -51,7 +53,7 @@ class AppFixtures extends Fixture
         $post2
             ->setTitle('Second post')
             ->setBody('Here is another body -- second post')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($post2);
 
@@ -59,7 +61,7 @@ class AppFixtures extends Fixture
         $post3
             ->setTitle('Third post')
             ->setBody('What a nice body for the third post')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($post3);
 
@@ -67,7 +69,7 @@ class AppFixtures extends Fixture
         $post4
             ->setTitle('Fourth post')
             ->setBody('Body of the last, fourth post')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($post4);
 
@@ -76,7 +78,7 @@ class AppFixtures extends Fixture
         $comment1
             ->setBody('First comment about post #1')
             ->setAuthor('Dark Vador')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($comment1);
 
@@ -84,7 +86,7 @@ class AppFixtures extends Fixture
         $comment2
             ->setBody('First comment about post #3')
             ->setAuthor('Yoshi')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($comment2);
 
@@ -92,7 +94,7 @@ class AppFixtures extends Fixture
         $comment3
             ->setBody('Second comment about post #3')
             ->setAuthor('Mario')
-            ->setCreatedAt(new DateTime())
+            ->setCreatedAt(new DateTimeImmutable())
         ;
         $manager->persist($comment3);
 

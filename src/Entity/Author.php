@@ -1,60 +1,52 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
+use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use Stringable;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="author")
- *
- * @Audit\Auditable()
- */
-class Author
+#[ORM\Entity]
+#[ORM\Table(name: 'author')]
+#[Audit\Auditable(enabled: true)]
+class Author implements Stringable
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     protected $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     protected $fullname;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     protected $email;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Post", mappedBy="author", cascade={"persist"})
-     * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=false)
-     */
+    #[ORM\OneToMany(targetEntity: 'Post', mappedBy: 'author', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'id', referencedColumnName: 'author_id', nullable: false)]
     protected $posts;
-
-//    /**
-//     * @ORM\OneToMany(targetEntity="Post", mappedBy="coauthor", cascade={"persist"})
-//     * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=false)
-//     */
-//    protected $coauthoredPosts;
 
     public function __construct()
     {
         $this->posts = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->getFullname() ?? self::class.'#'.$this->getId();
+    }
+
+    public function __sleep()
+    {
+        return ['id', 'fullname', 'email'];
+    }
+
     /**
      * Set the value of id.
-     *
-     * @param int $id
-     *
-     * @return Author
      */
     public function setId(int $id): self
     {
@@ -75,10 +67,6 @@ class Author
 
     /**
      * Set the value of fullname.
-     *
-     * @param string $fullname
-     *
-     * @return Author
      */
     public function setFullname(string $fullname): self
     {
@@ -99,10 +87,6 @@ class Author
 
     /**
      * Set the value of email.
-     *
-     * @param string $email
-     *
-     * @return Author
      */
     public function setEmail(string $email): self
     {
@@ -123,10 +107,6 @@ class Author
 
     /**
      * Add Post entity to collection (one to many).
-     *
-     * @param Post $post
-     *
-     * @return Author
      */
     public function addPost(Post $post): self
     {
@@ -137,10 +117,6 @@ class Author
 
     /**
      * Remove Post entity from collection (one to many).
-     *
-     * @param Post $post
-     *
-     * @return Author
      */
     public function removePost(Post $post): self
     {
@@ -152,60 +128,9 @@ class Author
 
     /**
      * Get Post entity collection (one to many).
-     *
-     * @return Collection
      */
     public function getPosts(): Collection
     {
         return $this->posts;
-    }
-
-//    /**
-//     * Add Post entity to collection (one to many).
-//     *
-//     * @param Post $post
-//     *
-//     * @return Author
-//     */
-//    public function addCoauthoredPost(Post $post): self
-//    {
-//        $this->coauthoredPosts[] = $post;
-//
-//        return $this;
-//    }
-//
-//    /**
-//     * Remove Post entity from collection (one to many).
-//     *
-//     * @param Post $post
-//     *
-//     * @return Author
-//     */
-//    public function removeCoauthoredPost(Post $post): self
-//    {
-//        $this->coauthoredPosts->removeElement($post);
-//        $post->setAuthor(null);
-//
-//        return $this;
-//    }
-//
-//    /**
-//     * Get Post entity collection (one to many).
-//     *
-//     * @return Collection
-//     */
-//    public function getCoauthoredPosts(): Collection
-//    {
-//        return $this->coauthoredPosts;
-//    }
-
-    public function __toString(): string
-    {
-        return $this->getFullname() ?? __CLASS__.'#'.$this->getId();
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'fullname', 'email'];
     }
 }

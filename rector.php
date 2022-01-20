@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Rector\Core\Configuration\Option;
 use Rector\Core\ValueObject\PhpVersion;
+use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\Php74\Rector\Property\TypedPropertyRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
@@ -29,6 +30,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->import(PHPUnitSetList::PHPUNIT_91);
     $containerConfigurator->import(PHPUnitSetList::PHPUNIT_CODE_QUALITY);
     $containerConfigurator->import(PHPUnitSetList::PHPUNIT_YIELD_DATA_PROVIDER);
+
+    // Doctrine Rules
+    $containerConfigurator->import(DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES);
 
     // Symfony Rules
     $parameters->set(

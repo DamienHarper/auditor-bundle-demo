@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Event;
 
 use App\Entity\Author;
@@ -8,11 +10,8 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 class AuthorEventListener
 {
-    private $flashBag;
-
-    public function __construct(FlashBagInterface $flashBag)
+    public function __construct(private readonly FlashBagInterface $flashBag)
     {
-        $this->flashBag = $flashBag;
     }
 
     // the entity listener methods receive two arguments:

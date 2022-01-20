@@ -1,35 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
+use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use Stringable;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="tag")
- *
- * @Audit\Auditable()
- */
-class Tag
+#[ORM\Entity]
+#[ORM\Table(name: 'tag')]
+#[Audit\Auditable(enabled: true)]
+class Tag implements Stringable
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     protected $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     protected $title;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="Post", mappedBy="tags", cascade={"persist", "remove"})
-     */
+    #[ORM\ManyToMany(targetEntity: 'Post', mappedBy: 'tags', cascade: ['persist', 'remove'])]
     protected $posts;
 
     public function __construct()
@@ -37,12 +31,18 @@ class Tag
         $this->posts = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->title;
+    }
+
+    public function __sleep()
+    {
+        return ['id', 'title'];
+    }
+
     /**
      * Set the value of id.
-     *
-     * @param int $id
-     *
-     * @return Tag
      */
     public function setId(int $id): self
     {
@@ -63,10 +63,6 @@ class Tag
 
     /**
      * Set the value of title.
-     *
-     * @param string $title
-     *
-     * @return Tag
      */
     public function setTitle(string $title): self
     {
@@ -87,10 +83,6 @@ class Tag
 
     /**
      * Add Post entity to collection.
-     *
-     * @param Post $post
-     *
-     * @return Tag
      */
     public function addPost(Post $post): self
     {
@@ -101,10 +93,6 @@ class Tag
 
     /**
      * Remove Post entity from collection.
-     *
-     * @param Post $post
-     *
-     * @return Tag
      */
     public function removePost(Post $post): self
     {
@@ -115,21 +103,9 @@ class Tag
 
     /**
      * Get Post entity collection.
-     *
-     * @return Collection
      */
     public function getPosts(): Collection
     {
         return $this->posts;
-    }
-
-    public function __toString()
-    {
-        return $this->title;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'title'];
     }
 }

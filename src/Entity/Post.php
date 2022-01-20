@@ -1,80 +1,62 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
+use DateTimeImmutable;
+use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use Stringable;
 
 /**
- * @ORM\Entity
- * @ORM\Table(name="post", indexes={@ORM\Index(name="fk_1_idx", columns={"author_id"})})
  * @Gedmo\SoftDeleteable(fieldName="deleted_at", timeAware=false, hardDelete=false)
- *
- * @Audit\Auditable()
  */
-class Post
+#[ORM\Entity]
+#[ORM\Table(name: 'post', indexes: [new ORM\Index(name: 'fk_1_idx', columns: ['author_id'])])]
+#[Audit\Auditable(enabled: true)]
+class Post implements Stringable
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     protected $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     protected $title;
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type: 'text')]
     protected $body;
 
     /**
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime")
      */
+    #[ORM\Column(type: 'datetime')]
     protected $created_at;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true, options={"default": NULL})
-     */
+    #[ORM\Column(type: 'datetime', nullable: true, options: ['default' => 'NULL'])]
     protected $deleted_at;
 
-    /**
-     * @ORM\Column(type="integer", options={"unsigned": true}, nullable=true)
-     */
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true], nullable: true)]
     protected $author_id;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Comment", mappedBy="post", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="id", referencedColumnName="post_id", nullable=true)
-     */
+    #[ORM\OneToMany(targetEntity: 'Comment', mappedBy: 'post', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'id', referencedColumnName: 'post_id', nullable: true)]
     protected $comments;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Author", inversedBy="posts", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Author', inversedBy: 'posts', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: true)]
     protected $author;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Author", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="coauthor_id", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Author', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'coauthor_id', referencedColumnName: 'id', nullable: true)]
     protected $coauthor;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="posts", cascade={"persist", "remove"})
-     * @ORM\JoinTable(name="post__tag",
-     *     joinColumns={@ORM\JoinColumn(name="post_id", referencedColumnName="id", nullable=false)},
-     *     inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id", nullable=false)}
-     * )
-     */
+    #[ORM\ManyToMany(targetEntity: 'Tag', inversedBy: 'posts', cascade: ['persist', 'remove'])]
+    #[ORM\JoinTable(name: 'post__tag', joinColumns: [new ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false)], inverseJoinColumns: [new ORM\JoinColumn(name: 'tag_id', referencedColumnName: 'id', nullable: false)])]
     protected $tags;
 
     public function __construct()
@@ -83,12 +65,18 @@ class Post
         $this->tags = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->title;
+    }
+
+    public function __sleep()
+    {
+        return ['id', 'title', 'body', 'created_at', 'author_id'];
+    }
+
     /**
      * Set the value of id.
-     *
-     * @param int $id
-     *
-     * @return Post
      */
     public function setId(int $id): self
     {
@@ -109,10 +97,6 @@ class Post
 
     /**
      * Set the value of title.
-     *
-     * @param string $title
-     *
-     * @return Post
      */
     public function setTitle(string $title): self
     {
@@ -133,10 +117,6 @@ class Post
 
     /**
      * Set the value of body.
-     *
-     * @param string $body
-     *
-     * @return Post
      */
     public function setBody(string $body): self
     {
@@ -157,12 +137,8 @@ class Post
 
     /**
      * Set the value of created_at.
-     *
-     * @param ?\DateTime $created_at
-     *
-     * @return Post
      */
-    public function setCreatedAt(?\DateTime $created_at): self
+    public function setCreatedAt(?DateTimeImmutable $created_at): self
     {
         $this->created_at = $created_at;
 
@@ -171,20 +147,14 @@ class Post
 
     /**
      * Get the value of created_at.
-     *
-     * @return ?\DateTime
      */
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->created_at;
     }
 
     /**
      * Set the value of author_id.
-     *
-     * @param int $author_id
-     *
-     * @return Post
      */
     public function setAuthorId(int $author_id): self
     {
@@ -205,10 +175,6 @@ class Post
 
     /**
      * Add Comment entity to collection (one to many).
-     *
-     * @param Comment $comment
-     *
-     * @return Post
      */
     public function addComment(Comment $comment): self
     {
@@ -219,10 +185,6 @@ class Post
 
     /**
      * Remove Comment entity from collection (one to many).
-     *
-     * @param Comment $comment
-     *
-     * @return Post
      */
     public function removeComment(Comment $comment): self
     {
@@ -234,8 +196,6 @@ class Post
 
     /**
      * Get Comment entity collection (one to many).
-     *
-     * @return Collection
      */
     public function getComments(): Collection
     {
@@ -244,10 +204,6 @@ class Post
 
     /**
      * Set Author entity (many to one).
-     *
-     * @param ?Author $author
-     *
-     * @return Post
      */
     public function setAuthor(?Author $author): self
     {
@@ -258,10 +214,6 @@ class Post
 
     /**
      * Set Author entity (many to one).
-     *
-     * @param ?Author $author
-     *
-     * @return Post
      */
     public function setCoauthor(?Author $author): self
     {
@@ -272,8 +224,6 @@ class Post
 
     /**
      * Get Author entity (many to one).
-     *
-     * @return ?Author
      */
     public function getAuthor(): ?Author
     {
@@ -282,8 +232,6 @@ class Post
 
     /**
      * Get Author entity (many to one).
-     *
-     * @return ?Author
      */
     public function getCoauthor(): ?Author
     {
@@ -292,10 +240,6 @@ class Post
 
     /**
      * Add Tag entity to collection.
-     *
-     * @param Tag $tag
-     *
-     * @return Post
      */
     public function addTag(Tag $tag): self
     {
@@ -307,10 +251,6 @@ class Post
 
     /**
      * Remove Tag entity from collection.
-     *
-     * @param Tag $tag
-     *
-     * @return Post
      */
     public function removeTag(Tag $tag): self
     {
@@ -322,21 +262,9 @@ class Post
 
     /**
      * Get Tag entity collection.
-     *
-     * @return Collection
      */
     public function getTags(): Collection
     {
         return $this->tags;
-    }
-
-    public function __toString()
-    {
-        return $this->title;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'title', 'body', 'created_at', 'author_id'];
     }
 }
