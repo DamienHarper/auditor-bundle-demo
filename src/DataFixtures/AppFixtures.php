@@ -141,8 +141,10 @@ class AppFixtures extends Fixture
 //        ;
 //        $manager->persist($author1);
         $post1->setAuthor($author1);
-        $post2->setAuthor($author1);
         $manager->persist($post1);
+
+        $post2->setAuthor($author1);
+        $manager->persist($post2);
 
         $author2->addPost($post3);
         $manager->persist($author2);
