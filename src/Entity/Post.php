@@ -16,7 +16,7 @@ use Stringable;
  * @Gedmo\SoftDeleteable(fieldName="deleted_at", timeAware=false, hardDelete=false)
  */
 #[ORM\Entity]
-#[ORM\Table(name: 'post', indexes: [new ORM\Index(name: 'fk_1_idx', columns: ['author_id'])])]
+#[ORM\Table(name: 'post', schema: 'dams', indexes: [new ORM\Index(name: 'fk_1_idx', columns: ['author_id'])])]
 #[Audit\Auditable(enabled: true)]
 class Post implements Stringable
 {

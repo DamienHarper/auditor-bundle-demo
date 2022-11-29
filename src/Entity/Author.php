@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Stringable;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'author')]
+#[ORM\Table(name: 'author', schema: 'dams')]
 #[Audit\Auditable(enabled: true)]
 class Author implements Stringable
 {

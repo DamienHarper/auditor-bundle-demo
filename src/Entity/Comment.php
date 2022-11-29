@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity]
-#[ORM\Table(name: '`comment`', indexes: [new ORM\Index(name: 'fk__idx', columns: ['post_id'])])]
+#[ORM\Table(name: '`comment`', schema: 'dams', indexes: [new ORM\Index(name: 'fk__idx', columns: ['post_id'])])]
 #[Audit\Auditable(enabled: true)]
 class Comment
 {
