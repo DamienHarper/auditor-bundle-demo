@@ -24,6 +24,8 @@ bin/console cache:clear
 symfony serve
 ```
 
+Then open your browser and go to `https://127.0.0.1:8000/author/` to see the list of author entities.
+
 ## Screenshots
 
 ### Audit inventory
