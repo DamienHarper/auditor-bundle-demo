@@ -9,6 +9,7 @@
         "php": "^8.0",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "damienharper/auditor": "^3.0@dev",
         "damienharper/auditor-bundle": "dev-master",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "gedmo/doctrine-extensions": "^3.0",
@@ -70,11 +71,5 @@
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "phpunit/phpunit": "^9.5"
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/Users/damienharper/Projects/personal/auditor"
-        }
-    ]
+    }
 }
