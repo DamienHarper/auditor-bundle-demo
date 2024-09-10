@@ -70,6 +70,6 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^11.3"
     }
 }
