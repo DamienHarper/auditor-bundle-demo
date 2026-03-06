@@ -1,136 +1,117 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
+use App\Repository\AuthorRepository;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Stringable;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'author', schema: 'dams')]
-#[Audit\Auditable(enabled: true)]
-class Author implements Stringable
+#[ORM\Entity(repositoryClass: AuthorRepository::class)]
+#[Audit\Auditable]
+class Author
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    protected $id;
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    protected $fullname;
+    #[ORM\Column(length: 100)]
+    private ?string $name = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    protected $email;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
 
-    #[ORM\OneToMany(targetEntity: 'Post', mappedBy: 'author', cascade: ['persist'])]
-    #[ORM\JoinColumn(name: 'id', referencedColumnName: 'author_id', nullable: false)]
-    protected $posts;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $bio = null;
+
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'author')]
+    private Collection $posts;
+
+    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'coauthor')]
+    private Collection $coauthoredPosts;
 
     public function __construct()
     {
         $this->posts = new ArrayCollection();
+        $this->coauthoredPosts = new ArrayCollection();
     }
 
-    public function __toString(): string
-    {
-        return $this->getFullname() ?? self::class.'#'.$this->getId();
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'fullname', 'email'];
-    }
-
-    /**
-     * Set the value of id.
-     */
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of id.
-     *
-     * @return int
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * Set the value of fullname.
-     */
-    public function setFullname(string $fullname): self
+    public function getName(): ?string
     {
-        $this->fullname = $fullname;
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get the value of fullname.
-     *
-     * @return string
-     */
-    public function getFullname(): ?string
+    public function getEmail(): ?string
     {
-        return $this->fullname;
+        return $this->email;
     }
 
-    /**
-     * Set the value of email.
-     */
-    public function setEmail(string $email): self
+    public function setEmail(string $email): static
     {
         $this->email = $email;
 
         return $this;
     }
 
-    /**
-     * Get the value of email.
-     *
-     * @return string
-     */
-    public function getEmail(): ?string
+    public function getBio(): ?string
     {
-        return $this->email;
+        return $this->bio;
     }
 
-    /**
-     * Add Post entity to collection (one to many).
-     */
-    public function addPost(Post $post): self
+    public function setBio(?string $bio): static
     {
-        $this->posts[] = $post;
+        $this->bio = $bio;
 
         return $this;
     }
 
-    /**
-     * Remove Post entity from collection (one to many).
-     */
-    public function removePost(Post $post): self
-    {
-        $this->posts->removeElement($post);
-        $post->setAuthor(null);
-
-        return $this;
-    }
-
-    /**
-     * Get Post entity collection (one to many).
-     */
     public function getPosts(): Collection
     {
         return $this->posts;
+    }
+
+    public function addPost(Post $post): static
+    {
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removePost(Post $post): static
+    {
+        if ($this->posts->removeElement($post)) {
+            if ($post->getAuthor() === $this) {
+                $post->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCoauthoredPosts(): Collection
+    {
+        return $this->coauthoredPosts;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
     }
 }

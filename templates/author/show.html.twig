@@ -1,32 +1,76 @@
-{% extends "base.html.twig" %}
+{% extends 'base.html.twig' %}
 
-{% set title = "Author" %}
-
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ author.name }} — AuditorBundle Demo{% endblock %}
 
 {% block body %}
-    <h1>{{ title }}</h1>
+<div class="mb-6">
+    <a href="{{ path('app_author_index') }}" class="text-sm text-gray-400 hover:text-gray-300">&larr; Authors</a>
+</div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ author.id }}</td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td>{{ author.fullname }}</td>
-            </tr>
-            <tr>
-                <th>Content</th>
-                <td>{{ author.email }}</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white">{{ author.name }}</h1>
+                    <p class="text-indigo-400">{{ author.email }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ path('app_author_edit', {id: author.id}) }}" class="px-3 py-1.5 text-sm rounded" style="background-color:#312e81;color:#c7d2fe">Edit</a>
+                    <form method="post" action="{{ path('app_author_delete', {id: author.id}) }}" onsubmit="return confirm('Delete {{ author.name }}?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
+                        <button type="submit" class="px-3 py-1.5 text-sm rounded" style="background-color:#450a0a;color:#fca5a5">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% if author.bio %}
+                <p class="text-gray-300">{{ author.bio }}</p>
+            {% else %}
+                <p class="text-gray-500 italic">No bio yet.</p>
+            {% endif %}
+        </div>
 
-    <a class="btn btn-primary" href="{{ path('author_edit', {'id': author.id}) }}">edit</a>
-<br/>
-    <a class="btn btn-link" href="{{ path('author_index') }}">back to list</a>
+        <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+            <h2 class="text-lg font-semibold text-white mb-4">Posts ({{ author.posts|length }})</h2>
+            {% if author.posts is empty %}
+                <p class="text-gray-500">No posts yet.</p>
+            {% else %}
+                <ul class="space-y-2">
+                    {% for post in author.posts %}
+                        <li class="flex items-center justify-between py-2" style="border-bottom:1px solid #1f2937">
+                            <a href="{{ path('app_post_show', {id: post.id}) }}" class="text-indigo-300 hover:text-indigo-200">{{ post.title }}</a>
+                            <span class="text-xs px-2 py-0.5 rounded" style="background-color:{% if post.status == 'published' %}#14532d;color:#86efac{% else %}#1f2937;color:#9ca3af{% endif %}">{{ post.status }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
 
-    {{ include('author/_delete_form.html.twig') }}
+    <div class="space-y-6">
+        <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-white">Recent Audit Trail</h2>
+                <a href="{{ path('dh_auditor_show_entity_stream', {entity: 'App-Entity-Author', id: author.id}) }}" class="text-xs text-purple-400 hover:text-purple-300">View all</a>
+            </div>
+            {% if audits is empty %}
+                <p class="text-gray-500 text-sm">No audit entries yet.</p>
+            {% else %}
+                <ul class="space-y-3">
+                    {% for entry in audits %}
+                        <li>
+                            <div class="flex items-center gap-2 mb-1">
+                                {% include '_partials/audit_badge.html.twig' with {type: entry.type} %}
+                                <span class="text-xs text-gray-500">{{ entry.createdAt ? entry.createdAt|date('M d, H:i') : '' }}</span>
+                            </div>
+                            {% if entry.username %}
+                                <p class="text-xs text-gray-400">by {{ entry.username }}</p>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

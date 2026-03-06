@@ -1,270 +1,218 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
-use DateTimeImmutable;
+use App\Repository\PostRepository;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
-use Stringable;
 
-/**
- * @Gedmo\SoftDeleteable(fieldName="deleted_at", timeAware=false, hardDelete=false)
- */
-#[ORM\Entity]
-#[ORM\Table(name: 'post', schema: 'dams', indexes: [new ORM\Index(name: 'fk_1_idx', columns: ['author_id'])])]
-#[Audit\Auditable(enabled: true)]
-class Post implements Stringable
+#[ORM\Entity(repositoryClass: PostRepository::class)]
+#[Audit\Auditable]
+class Post
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    protected $id;
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    protected $title;
+    #[ORM\Column(length: 255)]
+    private ?string $title = null;
 
-    #[ORM\Column(type: 'text')]
-    protected $body;
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $body = null;
 
-    /**
-     * @Gedmo\Timestampable(on="create")
-     */
-    #[ORM\Column(type: 'datetime')]
-    protected $created_at;
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $excerpt = null;
 
-    #[ORM\Column(type: 'datetime', nullable: true, options: ['default' => 'NULL'])]
-    protected $deleted_at;
+    #[ORM\Column(length: 20)]
+    private ?string $status = 'draft';
 
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true], nullable: true)]
-    protected $author_id;
+    #[Audit\Ignore]
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\OneToMany(targetEntity: 'Comment', mappedBy: 'post', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'id', referencedColumnName: 'post_id', nullable: true)]
-    protected $comments;
+    #[Audit\Ignore]
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\ManyToOne(targetEntity: 'Author', inversedBy: 'posts', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'author_id', referencedColumnName: 'id', nullable: true)]
-    protected $author;
+    #[ORM\ManyToOne(targetEntity: Author::class, inversedBy: 'posts')]
+    private ?Author $author = null;
 
-    #[ORM\ManyToOne(targetEntity: 'Author', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'coauthor_id', referencedColumnName: 'id', nullable: true)]
-    protected $coauthor;
+    #[ORM\ManyToOne(targetEntity: Author::class, inversedBy: 'coauthoredPosts')]
+    private ?Author $coauthor = null;
 
-    #[ORM\ManyToMany(targetEntity: 'Tag', inversedBy: 'posts', cascade: ['persist', 'remove'])]
-    #[ORM\JoinTable(name: 'post__tag', joinColumns: [new ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false)], inverseJoinColumns: [new ORM\JoinColumn(name: 'tag_id', referencedColumnName: 'id', nullable: false)])]
-    protected $tags;
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'post', cascade: ['remove'])]
+    private Collection $comments;
+
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'posts')]
+    #[ORM\JoinTable(name: 'post_tag')]
+    private Collection $tags;
 
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function __toString(): string
-    {
-        return (string) $this->title;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'title', 'body', 'created_at', 'author_id'];
-    }
-
-    /**
-     * Set the value of id.
-     */
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of id.
-     *
-     * @return int
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * Set the value of title.
-     */
-    public function setTitle(string $title): self
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
     {
         $this->title = $title;
 
         return $this;
     }
 
-    /**
-     * Get the value of title.
-     *
-     * @return string
-     */
-    public function getTitle(): ?string
+    public function getBody(): ?string
     {
-        return $this->title;
+        return $this->body;
     }
 
-    /**
-     * Set the value of body.
-     */
-    public function setBody(string $body): self
+    public function setBody(string $body): static
     {
         $this->body = $body;
 
         return $this;
     }
 
-    /**
-     * Get the value of body.
-     *
-     * @return string
-     */
-    public function getBody(): ?string
+    public function getExcerpt(): ?string
     {
-        return $this->body;
+        return $this->excerpt;
     }
 
-    /**
-     * Set the value of created_at.
-     */
-    public function setCreatedAt(?DateTimeImmutable $created_at): self
+    public function setExcerpt(?string $excerpt): static
     {
-        $this->created_at = $created_at;
+        $this->excerpt = $excerpt;
 
         return $this;
     }
 
-    /**
-     * Get the value of created_at.
-     */
-    public function getCreatedAt(): ?DateTimeImmutable
+    public function getStatus(): ?string
     {
-        return $this->created_at;
+        return $this->status;
     }
 
-    /**
-     * Set the value of author_id.
-     */
-    public function setAuthorId(int $author_id): self
+    public function setStatus(string $status): static
     {
-        $this->author_id = $author_id;
+        $this->status = $status;
 
         return $this;
     }
 
-    /**
-     * Get the value of author_id.
-     *
-     * @return int
-     */
-    public function getAuthorId(): ?int
+    public function isPublished(): bool
     {
-        return $this->author_id;
+        return $this->status === 'published';
     }
 
-    /**
-     * Add Comment entity to collection (one to many).
-     */
-    public function addComment(Comment $comment): self
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
-        $this->comments[] = $comment;
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    /**
-     * Remove Comment entity from collection (one to many).
-     */
-    public function removeComment(Comment $comment): self
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        $this->comments->removeElement($comment);
-        $comment->setPost(null);
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
-    /**
-     * Get Comment entity collection (one to many).
-     */
-    public function getComments(): Collection
+    public function getAuthor(): ?Author
     {
-        return $this->comments;
+        return $this->author;
     }
 
-    /**
-     * Set Author entity (many to one).
-     */
-    public function setAuthor(?Author $author): self
+    public function setAuthor(?Author $author): static
     {
         $this->author = $author;
 
         return $this;
     }
 
-    /**
-     * Set Author entity (many to one).
-     */
-    public function setCoauthor(?Author $author): self
-    {
-        $this->coauthor = $author;
-
-        return $this;
-    }
-
-    /**
-     * Get Author entity (many to one).
-     */
-    public function getAuthor(): ?Author
-    {
-        return $this->author;
-    }
-
-    /**
-     * Get Author entity (many to one).
-     */
     public function getCoauthor(): ?Author
     {
         return $this->coauthor;
     }
 
-    /**
-     * Add Tag entity to collection.
-     */
-    public function addTag(Tag $tag): self
+    public function setCoauthor(?Author $coauthor): static
     {
-        $tag->addPost($this);
-        $this->tags[] = $tag;
+        $this->coauthor = $coauthor;
 
         return $this;
     }
 
-    /**
-     * Remove Tag entity from collection.
-     */
-    public function removeTag(Tag $tag): self
+    public function getComments(): Collection
     {
-        $tag->removePost($this);
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            if ($comment->getPost() === $this) {
+                $comment->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
         $this->tags->removeElement($tag);
 
         return $this;
     }
 
-    /**
-     * Get Tag entity collection.
-     */
-    public function getTags(): Collection
+    public function __toString(): string
     {
-        return $this->tags;
+        return $this->title ?? '';
     }
 }

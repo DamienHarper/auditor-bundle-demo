@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ post.title }} — AuditorBundle Demo{% endblock %}
+
+{% block body %}
+<div class="mb-6">
+    <a href="{{ path('app_post_index') }}" class="text-sm text-gray-400 hover:text-gray-300">&larr; All Posts</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <article style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex flex-wrap gap-1.5 mb-3">
+                        {% for tag in post.tags %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white" style="background-color:{{ tag.color }}">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                    <h1 class="text-2xl font-bold text-white mb-2">{{ post.title }}</h1>
+                    <div class="flex items-center gap-3 text-sm text-gray-400">
+                        {% if post.author %}
+                            <span>by <a href="{{ path('app_author_show', {id: post.author.id}) }}" class="text-indigo-400">{{ post.author.name }}</a>
+                            {% if post.coauthor %} &amp; <a href="{{ path('app_author_show', {id: post.coauthor.id}) }}" class="text-indigo-400">{{ post.coauthor.name }}</a>{% endif %}
+                            </span>
+                        {% endif %}
+                        <span class="text-xs px-2 py-0.5 rounded" style="{% if post.status == 'published' %}background-color:#14532d;color:#86efac{% else %}background-color:#1f2937;color:#9ca3af{% endif %}">{{ post.status }}</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-4">
+                    <a href="{{ path('app_post_edit', {id: post.id}) }}" class="px-3 py-1.5 text-sm rounded" style="background-color:#312e81;color:#c7d2fe">Edit</a>
+                    <form method="post" action="{{ path('app_post_delete', {id: post.id}) }}" onsubmit="return confirm('Delete post?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ post.id) }}">
+                        <button type="submit" class="px-3 py-1.5 text-sm rounded" style="background-color:#450a0a;color:#fca5a5">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="prose prose-invert max-w-none text-gray-300 leading-relaxed">
+                {{ post.body|nl2br }}
+            </div>
+        </article>
+
+        {# Comments #}
+        <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+            <h2 class="text-lg font-semibold text-white mb-4">Comments ({{ post.comments|length }})</h2>
+
+            {% if post.comments is empty %}
+                <p class="text-gray-500 text-sm mb-6">No comments yet.</p>
+            {% else %}
+                <ul class="space-y-4 mb-6">
+                    {% for comment in post.comments %}
+                        <li style="background-color:#0d111d;border:1px solid #1f2937;border-radius:.5rem" class="p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium text-sm text-white">{{ comment.authorName }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-500">{{ comment.createdAt ? comment.createdAt|date('M d, H:i') : '' }}</span>
+                                    <form method="post" action="{{ path('app_comment_delete', {id: comment.id}) }}" onsubmit="return confirm('Delete comment?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                        <button type="submit" class="text-xs px-2 py-0.5 rounded" style="background-color:#450a0a;color:#fca5a5">×</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-300">{{ comment.body }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div style="border-top:1px solid #1f2937" class="pt-4">
+                <h3 class="text-sm font-medium text-gray-300 mb-3">Add a comment</h3>
+                {{ form_start(comment_form, {action: path('app_comment_new', {id: post.id}), method: 'POST', attr: {class: 'space-y-3'}}) }}
+                    <div>
+                        {{ form_label(comment_form.authorName, null, {label_attr: {class: 'block text-xs font-medium text-gray-400 mb-1'}}) }}
+                        {{ form_widget(comment_form.authorName) }}
+                    </div>
+                    <div>
+                        {{ form_label(comment_form.body, null, {label_attr: {class: 'block text-xs font-medium text-gray-400 mb-1'}}) }}
+                        {{ form_widget(comment_form.body) }}
+                    </div>
+                    <button type="submit" class="px-4 py-2 text-sm rounded-lg text-white" style="background-color:#4f46e5">Post Comment</button>
+                {{ form_end(comment_form) }}
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Audit Trail</h2>
+            <a href="{{ path('dh_auditor_show_entity_stream', {entity: 'App-Entity-Post', id: post.id}) }}" class="block text-center py-2 text-sm rounded" style="background-color:#2e1065;color:#d8b4fe;border:1px solid #7c3aed">
+                View audit history
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

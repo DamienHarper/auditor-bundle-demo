@@ -1,45 +1,44 @@
-{% extends "base.html.twig" %}
+{% extends 'base.html.twig' %}
 
-{% set title = "Author index" %}
-
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Authors — AuditorBundle Demo{% endblock %}
 
 {% block body %}
-<h1>{{ title }}</h1>
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-white">Authors</h1>
+        <p class="text-gray-400 mt-1">{{ authors|length }} author{% if authors|length != 1 %}s{% endif %}</p>
+    </div>
+    <a href="{{ path('app_author_new') }}" class="px-4 py-2 rounded-lg text-sm font-medium text-white" style="background-color:#4f46e5">+ New Author</a>
+</div>
 
-{% for flashMessage in app.session.flashbag.get('lifecycleevent.message') %}
-<div class="alert alert-primary" role="alert">{{ flashMessage }}</div>
-{% endfor %}
-<table class="table">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Fullname</th>
-            <th>Email</th>
-            <th>actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for author in authors %}
-        <tr>
-            <td>{{ author.id }}</td>
-            <td>{{ author.fullname }}</td>
-            <td>{{ author.email }}</td>
-            <td>
-                <a class="btn btn-link" href="{{ path('author_show', {'id': author.id}) }}">view</a>
-                <a class="btn btn-primary" href="{{ path('author_edit', {'id': author.id}) }}">edit</a>
-                <a class="btn btn-secondary" href="{{ path('dh_auditor_show_entity_history', {'entity': 'App-Entity-Author', 'id': author.id}) }}">audits</a>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="6">no author found</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<a class="btn btn-primary" href="{{ path('author_new') }}">New author</a>
-
-<a class="btn btn-secondary" href="{{ path('dh_auditor_show_entity_history', {'entity': 'App-Entity-Author'}) }}">Author audits</a>
+{% if authors is empty %}
+    <div class="text-center py-16" style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem">
+        <p class="text-gray-400">No authors yet.</p>
+    </div>
+{% else %}
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {% for author in authors %}
+            <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">{{ author.name }}</h2>
+                        <p class="text-sm text-indigo-400">{{ author.email }}</p>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded" style="background-color:#1f2937;color:#9ca3af">{{ author.posts|length }} post{% if author.posts|length != 1 %}s{% endif %}</span>
+                </div>
+                {% if author.bio %}
+                    <p class="text-sm text-gray-400 mb-4 line-clamp-2">{{ author.bio }}</p>
+                {% endif %}
+                <div class="flex gap-2 mt-4">
+                    <a href="{{ path('app_author_show', {id: author.id}) }}" class="px-3 py-1.5 text-xs rounded" style="background-color:#1f2937;color:#d1d5db">View</a>
+                    <a href="{{ path('app_author_edit', {id: author.id}) }}" class="px-3 py-1.5 text-xs rounded" style="background-color:#312e81;color:#c7d2fe">Edit</a>
+                    <form method="post" action="{{ path('app_author_delete', {id: author.id}) }}" onsubmit="return confirm('Delete {{ author.name }}?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ author.id) }}">
+                        <button type="submit" class="px-3 py-1.5 text-xs rounded" style="background-color:#450a0a;color:#fca5a5">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 {% endblock %}

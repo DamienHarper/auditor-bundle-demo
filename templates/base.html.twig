@@ -1,19 +1,60 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {# Run `composer require symfony/webpack-encore-bundle`
-           and uncomment the following Encore helpers to start using Symfony UX #}
-        {% block stylesheets %}
-            {#{{ encore_entry_link_tags('app') }}#}
-        {% endblock %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AuditorBundle Demo{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen" style="background-color:#0d111d">
 
-        {% block javascripts %}
-            {#{{ encore_entry_script_tags('app') }}#}
-        {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
-    </body>
+<nav style="background-color:#111827;border-bottom:1px solid #1f2937" class="sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-8">
+                <a href="{{ path('app_home') }}" class="font-bold text-lg tracking-tight" style="color:#818cf8">
+                    AuditorBundle <span style="color:#6b7280;font-weight:400;font-size:.875rem">Demo</span>
+                </a>
+                <div class="hidden md:flex items-center gap-1">
+                    <a href="{{ path('app_home') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Blog</a>
+                    <a href="{{ path('app_post_index') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Posts</a>
+                    <a href="{{ path('app_author_index') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Authors</a>
+                    <a href="{{ path('app_tag_index') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Tags</a>
+                    {% if is_granted('ROLE_USER') %}
+                    <a href="{{ path('app_audit_history') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#c084fc">Audit History</a>
+                    <a href="{{ path('dh_auditor_list_audits') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#c084fc">Audit Viewer</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                {% if is_granted('ROLE_USER') %}
+                    <span class="text-sm" style="color:#9ca3af">{{ app.user.name ?? app.user.userIdentifier }}</span>
+                    <a href="{{ path('app_logout') }}" class="px-3 py-1.5 text-sm rounded-md" style="background-color:#1f2937;color:#d1d5db">Logout</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="px-3 py-1.5 text-sm rounded-md text-white" style="background-color:#4f46e5">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="mb-4 px-4 py-3 rounded-lg" style="{% if label == 'success' %}background-color:rgba(20,83,45,.5);border:1px solid #15803d;color:#bbf7d0{% elseif label == 'error' %}background-color:rgba(127,29,29,.5);border:1px solid #b91c1c;color:#fecaca{% else %}background-color:rgba(30,58,138,.5);border:1px solid #1d4ed8;color:#bfdbfe{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% block body %}{% endblock %}
+</main>
+
+<footer class="mt-16 py-6 text-center text-sm" style="border-top:1px solid #1f2937;color:#4b5563">
+    <p>AuditorBundle Demo &mdash; <a href="https://github.com/DamienHarper/auditor-bundle" style="color:#6366f1">damienharper/auditor-bundle</a> v7</p>
+</footer>
+
+{% block javascripts %}{% endblock %}
+</body>
 </html>

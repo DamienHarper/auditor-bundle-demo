@@ -1,168 +1,94 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
-use DateTimeImmutable;
+use App\Repository\CommentRepository;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 
-#[ORM\Entity]
-#[ORM\Table(name: '`comment`', schema: 'dams', indexes: [new ORM\Index(name: 'fk__idx', columns: ['post_id'])])]
-#[Audit\Auditable(enabled: true)]
+#[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[Audit\Auditable]
 class Comment
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    protected $id;
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
     #[ORM\Column(type: 'text')]
-    protected $body;
+    private ?string $body = null;
 
-    /**
-     * Comment author email.
-     */
-    #[ORM\Column(type: 'string', length: 255)]
-    protected $author;
+    #[ORM\Column(length: 100)]
+    private ?string $authorName = null;
 
-    /**
-     * @Gedmo\Timestampable(on="create")
-     */
-    #[ORM\Column(type: 'datetime')]
-    protected $created_at;
+    #[Audit\Ignore]
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true], nullable: true)]
-    protected $post_id;
-
-    #[ORM\ManyToOne(targetEntity: 'Post', inversedBy: 'comments', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: 'post_id', referencedColumnName: 'id', nullable: false)]
-    protected $post;
+    #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Post $post = null;
 
     public function __construct()
     {
+        $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function __sleep()
-    {
-        return ['id', 'body', 'author', 'created_at', 'post_id'];
-    }
-
-    /**
-     * Set the value of id.
-     */
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of id.
-     *
-     * @return int
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * Set the value of body.
-     */
-    public function setBody(string $body): self
+    public function getBody(): ?string
+    {
+        return $this->body;
+    }
+
+    public function setBody(string $body): static
     {
         $this->body = $body;
 
         return $this;
     }
 
-    /**
-     * Get the value of body.
-     *
-     * @return string
-     */
-    public function getBody(): ?string
+    public function getAuthorName(): ?string
     {
-        return $this->body;
+        return $this->authorName;
     }
 
-    /**
-     * Set the value of author.
-     */
-    public function setAuthor(string $author): self
+    public function setAuthorName(string $authorName): static
     {
-        $this->author = $author;
+        $this->authorName = $authorName;
 
         return $this;
     }
 
-    /**
-     * Get the value of author.
-     *
-     * @return string
-     */
-    public function getAuthor(): ?string
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->author;
+        return $this->createdAt;
     }
 
-    /**
-     * Set the value of created_at.
-     */
-    public function setCreatedAt(?DateTimeImmutable $created_at): self
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    /**
-     * Get the value of created_at.
-     */
-    public function getCreatedAt(): ?DateTimeImmutable
+    public function getPost(): ?Post
     {
-        return $this->created_at;
+        return $this->post;
     }
 
-    /**
-     * Set the value of post_id.
-     */
-    public function setPostId(int $post_id): self
-    {
-        $this->post_id = $post_id;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of post_id.
-     *
-     * @return int
-     */
-    public function getPostId(): ?int
-    {
-        return $this->post_id;
-    }
-
-    /**
-     * Set Post entity (many to one).
-     */
-    public function setPost(?Post $post): self
+    public function setPost(?Post $post): static
     {
         $this->post = $post;
 
         return $this;
     }
 
-    /**
-     * Get Post entity (many to one).
-     */
-    public function getPost(): ?Post
+    public function __toString(): string
     {
-        return $this->post;
+        return 'Comment #' . ($this->id ?? '?') . ' by ' . ($this->authorName ?? 'unknown');
     }
 }

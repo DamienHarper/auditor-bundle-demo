@@ -1,26 +1,21 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Controller;
 
 use App\Entity\Author;
 use App\Form\AuthorType;
 use App\Repository\AuthorRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/author')]
+#[Route('/authors')]
 class AuthorController extends AbstractController
 {
-    public function __construct(private readonly ManagerRegistry $managerRegistry)
-    {
-    }
-
-    #[Route(path: '/', name: 'author_index', methods: ['GET'])]
+    #[Route('', name: 'app_author_index', methods: ['GET'])]
     public function index(AuthorRepository $authorRepository): Response
     {
         return $this->render('author/index.html.twig', [
@@ -28,60 +23,76 @@ class AuthorController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/new', name: 'author_new', methods: ['GET', 'POST'])]
-    public function new(Request $request): Response
+    #[Route('/new', name: 'app_author_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $em): Response
     {
         $author = new Author();
         $form = $this->createForm(AuthorType::class, $author);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->managerRegistry->getManager();
-            $entityManager->persist($author);
-            $entityManager->flush();
 
-            return $this->redirectToRoute('author_index');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->persist($author);
+            $em->flush();
+            $this->addFlash('success', 'Author created successfully.');
+
+            return $this->redirectToRoute('app_author_index');
         }
 
         return $this->render('author/new.html.twig', [
             'author' => $author,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
-    #[Route(path: '/{id}', name: 'author_show', methods: ['GET'])]
-    public function show(Author $author): Response
+    #[Route('/{id}', name: 'app_author_show', methods: ['GET'])]
+    public function show(Author $author, Reader $reader): Response
     {
+        $audits = [];
+        try {
+            $query = $reader->createQuery(Author::class, [
+                'object_id' => (string) $author->getId(),
+                'page' => 1,
+                'page_size' => 10,
+            ]);
+            $pager = $reader->paginate($query, 1, 10);
+            $audits = iterator_to_array($pager['results']);
+        } catch (\Throwable) {
+        }
+
         return $this->render('author/show.html.twig', [
             'author' => $author,
+            'audits' => $audits,
         ]);
     }
 
-    #[Route(path: '/{id}/edit', name: 'author_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Author $author): Response
+    #[Route('/{id}/edit', name: 'app_author_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Author $author, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(AuthorType::class, $author);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->managerRegistry->getManager()->flush();
 
-            return $this->redirectToRoute('author_index');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Author updated.');
+
+            return $this->redirectToRoute('app_author_show', ['id' => $author->getId()]);
         }
 
         return $this->render('author/edit.html.twig', [
             'author' => $author,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
-    #[Route(path: '/{id}', name: 'author_delete', methods: ['DELETE'])]
-    public function delete(Request $request, Author $author): Response
+    #[Route('/{id}/delete', name: 'app_author_delete', methods: ['POST'])]
+    public function delete(Request $request, Author $author, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$author->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->managerRegistry->getManager();
-            $entityManager->remove($author);
-            $entityManager->flush();
+            $em->remove($author);
+            $em->flush();
+            $this->addFlash('success', 'Author deleted.');
         }
 
-        return $this->redirectToRoute('author_index');
+        return $this->redirectToRoute('app_author_index');
     }
 }

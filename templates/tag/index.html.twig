@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tags — AuditorBundle Demo{% endblock %}
+
+{% block body %}
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-white">Tags</h1>
+        <p class="text-gray-400 mt-1">{{ tags|length }} tag{% if tags|length != 1 %}s{% endif %}</p>
+    </div>
+    <a href="{{ path('app_tag_new') }}" class="px-4 py-2 rounded-lg text-sm font-medium text-white" style="background-color:#4f46e5">+ New Tag</a>
+</div>
+
+{% if tags is empty %}
+    <div class="text-center py-16" style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem">
+        <p class="text-gray-400">No tags yet.</p>
+    </div>
+{% else %}
+    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {% for tag in tags %}
+            <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-full" style="background-color:{{ tag.color }}"></div>
+                    <div>
+                        <h2 class="font-semibold text-white">{{ tag.name }}</h2>
+                        <p class="text-xs text-gray-500">{{ tag.color }}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mb-3">{{ tag.posts|length }} post{% if tag.posts|length != 1 %}s{% endif %}</p>
+                <div class="flex gap-2">
+                    <a href="{{ path('app_tag_edit', {id: tag.id}) }}" class="px-2 py-1 text-xs rounded" style="background-color:#312e81;color:#c7d2fe">Edit</a>
+                    <form method="post" action="{{ path('app_tag_delete', {id: tag.id}) }}" onsubmit="return confirm('Delete tag {{ tag.name }}?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tag.id) }}">
+                        <button type="submit" class="px-2 py-1 text-xs rounded" style="background-color:#450a0a;color:#fca5a5">Delete</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

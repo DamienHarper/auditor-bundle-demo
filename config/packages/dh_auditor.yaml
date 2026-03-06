@@ -1,13 +1,19 @@
 dh_auditor:
-  enabled: true
-  providers:
-    doctrine:
-#      entities:
-#        App\Entity\Author: ~
-      viewer: true
-      table_prefix: ~
-      table_suffix: '_audit'
-#      storage_mapper: App\Service\MyStorageMapper::map
-      storage_services:
-        - '@doctrine.orm.default_entity_manager'
-#        - '@doctrine.orm.audits_entity_manager'
+    enabled: true
+    timezone: 'Europe/Paris'
+    providers:
+        doctrine:
+            table_suffix: '_audit'
+            ignored_columns:
+                - created_at
+                - updated_at
+            entities:
+                App\Entity\Author: ~
+                App\Entity\Post: ~
+                App\Entity\Comment: ~
+                App\Entity\Tag: ~
+            storage_services:
+                - '@doctrine.orm.default_entity_manager'
+            viewer:
+                enabled: true
+                page_size: 25

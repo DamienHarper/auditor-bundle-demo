@@ -1,111 +1,91 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Entity;
 
+use App\Repository\TagRepository;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Stringable;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'tag', schema: 'dams')]
-#[Audit\Auditable(enabled: true)]
-class Tag implements Stringable
+#[ORM\Entity(repositoryClass: TagRepository::class)]
+#[Audit\Auditable]
+class Tag
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
-    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    protected $id;
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    protected $title;
+    #[ORM\Column(length: 50, unique: true)]
+    private ?string $name = null;
 
-    #[ORM\ManyToMany(targetEntity: 'Post', mappedBy: 'tags', cascade: ['persist', 'remove'])]
-    protected $posts;
+    #[ORM\Column(length: 7)]
+    private ?string $color = null;
+
+    #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: 'tags')]
+    private Collection $posts;
 
     public function __construct()
     {
         $this->posts = new ArrayCollection();
     }
 
-    public function __toString(): string
-    {
-        return (string) $this->title;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'title'];
-    }
-
-    /**
-     * Set the value of id.
-     */
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of id.
-     *
-     * @return int
-     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * Set the value of title.
-     */
-    public function setTitle(string $title): self
+    public function getName(): ?string
     {
-        $this->title = $title;
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
 
         return $this;
     }
 
-    /**
-     * Get the value of title.
-     *
-     * @return string
-     */
-    public function getTitle(): ?string
+    public function getColor(): ?string
     {
-        return $this->title;
+        return $this->color;
     }
 
-    /**
-     * Add Post entity to collection.
-     */
-    public function addPost(Post $post): self
+    public function setColor(string $color): static
     {
-        $this->posts[] = $post;
+        $this->color = $color;
 
         return $this;
     }
 
-    /**
-     * Remove Post entity from collection.
-     */
-    public function removePost(Post $post): self
-    {
-        $this->posts->removeElement($post);
-
-        return $this;
-    }
-
-    /**
-     * Get Post entity collection.
-     */
     public function getPosts(): Collection
     {
         return $this->posts;
+    }
+
+    public function addPost(Post $post): static
+    {
+        if (!$this->posts->contains($post)) {
+            $this->posts->add($post);
+            $post->addTag($this);
+        }
+
+        return $this;
+    }
+
+    public function removePost(Post $post): static
+    {
+        if ($this->posts->removeElement($post)) {
+            $post->removeTag($this);
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
     }
 }
