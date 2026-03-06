@@ -3,56 +3,52 @@
 {% block title %}Login — AuditorBundle Demo{% endblock %}
 
 {% block body %}
-<div class="min-h-[60vh] flex items-center justify-center">
-    <div class="w-full max-w-md">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-white">Sign in</h1>
-            <p class="text-gray-400 mt-2">Access the audit journal and CRUD operations</p>
+<div class="flex items-center justify-center" style="min-height:60vh">
+    <div style="width:100%;max-width:420px">
+        <div class="text-center" style="margin-bottom:2rem">
+            <h1 class="page-title">Sign in</h1>
+            <p class="page-subtitle">Access the audit journal and CRUD operations</p>
         </div>
 
-        <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-8">
-            {% if error %}
-                <div class="mb-4 px-4 py-3 rounded-lg text-sm" style="background-color:rgba(127,29,29,.5);border:1px solid #b91c1c;color:#fca5a5">
-                    {{ error.messageKey|trans(error.messageData, 'security') }}
-                </div>
-            {% endif %}
+        <div class="card">
+            <div class="card-body">
+                {% if error %}
+                    <div class="flash flash-error" style="margin-bottom:1rem">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
 
-            <form method="post">
-                <div class="space-y-4">
+                <form method="post" class="space-y-4">
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                        <label for="username" class="form-label">Email</label>
                         <input type="email" id="username" name="_username" value="{{ last_username }}"
                                autocomplete="email" autofocus
-                               class="w-full rounded-lg text-white placeholder-gray-400 px-4 py-2.5"
-                               style="background-color:#1f2937;border:1px solid #374151"
+                               class="form-input"
                                placeholder="admin@blog.com">
                     </div>
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <label for="password" class="form-label">Password</label>
                         <input type="password" id="password" name="_password" autocomplete="current-password"
-                               class="w-full rounded-lg text-white placeholder-gray-400 px-4 py-2.5"
-                               style="background-color:#1f2937;border:1px solid #374151"
+                               class="form-input"
                                placeholder="••••••••">
                     </div>
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                    <button type="submit" class="w-full py-2.5 rounded-lg text-sm font-semibold text-white mt-2" style="background-color:#4f46e5">
-                        Sign in
-                    </button>
-                </div>
-            </form>
+                    <button type="submit" class="btn btn-primary" style="width:100%">Sign in</button>
+                </form>
 
-            <div class="mt-6 pt-6" style="border-top:1px solid #1f2937">
-                <p class="text-xs text-gray-500 text-center mb-3">Demo credentials:</p>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="p-2 rounded" style="background-color:#0d111d;border:1px solid #1f2937">
-                        <p class="text-gray-300 font-medium">Admin</p>
-                        <p class="text-gray-500">admin@blog.com</p>
-                        <p class="text-gray-500">password</p>
+                <hr class="divider" style="margin-top:1.5rem">
+
+                <p class="text-muted text-center" style="font-size:.75rem;margin-bottom:.75rem">Demo credentials:</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+                    <div class="card" style="padding:.625rem">
+                        <p style="font-weight:600;font-size:.8rem;color:var(--text-heading);margin:0 0 .25rem">Admin</p>
+                        <p class="text-muted" style="font-size:.75rem;margin:0">admin@blog.com</p>
+                        <p class="text-muted" style="font-size:.75rem;margin:0">password</p>
                     </div>
-                    <div class="p-2 rounded" style="background-color:#0d111d;border:1px solid #1f2937">
-                        <p class="text-gray-300 font-medium">Editor</p>
-                        <p class="text-gray-500">editor@blog.com</p>
-                        <p class="text-gray-500">password</p>
+                    <div class="card" style="padding:.625rem">
+                        <p style="font-weight:600;font-size:.8rem;color:var(--text-heading);margin:0 0 .25rem">Editor</p>
+                        <p class="text-muted" style="font-size:.75rem;margin:0">editor@blog.com</p>
+                        <p class="text-muted" style="font-size:.75rem;margin:0">password</p>
                     </div>
                 </div>
             </div>

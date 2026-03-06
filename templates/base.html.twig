@@ -4,45 +4,561 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AuditorBundle Demo{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Prevent flash of wrong theme
+        (function() {
+            var theme = localStorage.getItem('theme') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <style>
+        /* ============================================================
+           VARIABLES — same palette as auditor-docs
+           ============================================================ */
+        :root {
+            --color-primary:         #0a9e8a;
+            --color-primary-dark:    #076f61;
+            --color-primary-darker:  #055549;
+            --color-primary-light:   #0ebaa1;
+            --color-primary-lighter: #47d6c0;
+
+            --bg:          #ffffff;
+            --bg-surface:  #f8fafc;
+            --bg-card:     #ffffff;
+            --bg-input:    #f8fafc;
+            --border:      rgba(14,186,161,.15);
+            --border-hover:rgba(14,186,161,.4);
+
+            --text:        #334155;
+            --text-heading:#0f172a;
+            --text-muted:  #64748b;
+            --text-subtle: #94a3b8;
+
+            --navbar-bg:   #ffffff;
+            --navbar-border: rgba(14,186,161,.12);
+
+            --shadow-sm:   0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+            --shadow:      0 4px 16px rgba(14,186,161,.1), 0 1px 4px rgba(0,0,0,.06);
+
+            --radius:      8px;
+            --radius-lg:   12px;
+        }
+
+        [data-theme='dark'] {
+            --color-primary:         #0ebaa1;
+            --color-primary-dark:    #0a8270;
+            --color-primary-darker:  #076f61;
+            --color-primary-light:   #1fcbb2;
+            --color-primary-lighter: #47d6c0;
+
+            --bg:          #0f1117;
+            --bg-surface:  #161b22;
+            --bg-card:     #161b22;
+            --bg-input:    #0f1117;
+            --border:      rgba(14,186,161,.12);
+            --border-hover:rgba(14,186,161,.35);
+
+            --text:        #94a3b8;
+            --text-heading:#f1f5f9;
+            --text-muted:  #64748b;
+            --text-subtle: #475569;
+
+            --navbar-bg:   #0f1117;
+            --navbar-border: rgba(14,186,161,.1);
+
+            --shadow-sm:   0 1px 3px rgba(0,0,0,.3);
+            --shadow:      0 4px 20px rgba(0,0,0,.4);
+        }
+
+        /* ============================================================
+           BASE
+           ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            transition: background .2s, color .2s;
+        }
+
+        * { scrollbar-width: thin; scrollbar-color: rgba(14,186,161,.3) transparent; }
+        *::-webkit-scrollbar { width: 5px; height: 5px; }
+        *::-webkit-scrollbar-thumb { background: rgba(14,186,161,.3); border-radius: 3px; }
+
+        a { color: var(--color-primary); text-decoration: none; }
+
+        /* ============================================================
+           LAYOUT UTILITIES
+           ============================================================ */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: .25rem; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; }
+        .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; } .gap-8 { gap: 2rem; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-1 { flex: 1; }
+        .grid { display: grid; }
+        .hidden { display: none; }
+        .mt-1  { margin-top: .25rem; }  .mt-2  { margin-top: .5rem; }
+        .mt-4  { margin-top: 1rem; }    .mt-6  { margin-top: 1.5rem; }
+        .mb-2  { margin-bottom: .5rem; }.mb-4  { margin-bottom: 1rem; }
+        .mb-6  { margin-bottom: 1.5rem; }.mb-8  { margin-bottom: 2rem; }
+        .ml-4  { margin-left: 1rem; }
+        .py-8  { padding-top: 2rem; padding-bottom: 2rem; }
+        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+        .py-6  { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .text-center { text-align: center; }
+        .text-right  { text-align: right; }
+        .text-sm     { font-size: .875rem; }
+        .text-xs     { font-size: .75rem; }
+        .font-semibold { font-weight: 600; }
+        .font-bold     { font-weight: 700; }
+        .italic { font-style: italic; }
+        .w-full { width: 100%; }
+        .max-w-2xl { max-width: 42rem; }
+        .max-w-3xl { max-width: 48rem; }
+        .max-w-md  { max-width: 28rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-3 > * + * { margin-top: .75rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .whitespace-nowrap { white-space: nowrap; }
+
+        /* ============================================================
+           NAVBAR
+           ============================================================ */
+        .navbar {
+            background: var(--navbar-bg);
+            border-bottom: 1px solid var(--navbar-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            height: 60px;
+        }
+
+        .navbar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        [data-theme='dark'] .navbar-brand {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-lighter));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .navbar-links { display: flex; align-items: center; gap: .15rem; margin-left: 2rem; }
+
+        .nav-link {
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--text);
+            padding: .35rem .65rem;
+            border-radius: 6px;
+            transition: background .15s, color .15s;
+        }
+        .nav-link:hover { background: rgba(14,186,161,.08); color: var(--color-primary); }
+        .nav-link.audit { color: var(--color-primary); }
+        .nav-link.audit:hover { background: rgba(14,186,161,.1); }
+
+        .navbar-right { display: flex; align-items: center; gap: .75rem; }
+
+        .user-name {
+            font-size: .875rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           THEME TOGGLE
+           ============================================================ */
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: .35rem .5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: border-color .2s, color .2s, background .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 1rem;
+        }
+        .theme-toggle:hover { border-color: var(--color-primary); color: var(--color-primary); background: rgba(14,186,161,.06); }
+        .icon-sun  { display: none; }
+        .icon-moon { display: block; }
+        [data-theme='dark'] .icon-sun  { display: block; }
+        [data-theme='dark'] .icon-moon { display: none; }
+
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .45rem 1rem;
+            border-radius: 6px;
+            font-size: .875rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background .15s, border-color .15s, box-shadow .15s, transform .1s;
+            text-decoration: none;
+            line-height: 1.4;
+        }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-primary);
+        }
+        .btn-primary:hover { background: var(--color-primary-dark); border-color: var(--color-primary-dark); color: #fff; box-shadow: 0 4px 12px rgba(14,186,161,.3); }
+
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text);
+            border-color: var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); background: rgba(14,186,161,.04); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border-color: var(--border);
+        }
+        .btn-ghost:hover { background: var(--bg-surface); color: var(--text); }
+
+        .btn-danger {
+            background: transparent;
+            color: #ef4444;
+            border-color: rgba(239,68,68,.3);
+        }
+        .btn-danger:hover { background: rgba(239,68,68,.08); border-color: #ef4444; }
+
+        .btn-sm { padding: .3rem .65rem; font-size: .8rem; }
+        .btn-xs { padding: .2rem .5rem; font-size: .75rem; }
+
+        /* ============================================================
+           CARDS
+           ============================================================ */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        .card-hover { transition: border-color .2s, box-shadow .2s; }
+        .card-hover:hover { border-color: var(--color-primary); box-shadow: var(--shadow); }
+
+        .card-body { padding: 1.5rem; }
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            color: var(--text-heading);
+            font-size: .875rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        /* ============================================================
+           FORMS
+           ============================================================ */
+        .form-label {
+            display: block;
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: .35rem;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: .5rem .75rem;
+            font-size: .875rem;
+            color: var(--text-heading);
+            font-family: inherit;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(14,186,161,.12);
+        }
+        .form-textarea { resize: vertical; line-height: 1.6; }
+
+        /* ============================================================
+           TABLE
+           ============================================================ */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .875rem;
+        }
+        .data-table thead tr { border-bottom: 2px solid var(--border); }
+        .data-table thead th {
+            text-align: left;
+            padding: .65rem 1rem;
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted);
+        }
+        .data-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .12s;
+        }
+        .data-table tbody tr:last-child { border-bottom: none; }
+        .data-table tbody tr:hover { background: rgba(14,186,161,.04); }
+        .data-table tbody td { padding: .75rem 1rem; vertical-align: middle; }
+
+        /* ============================================================
+           BADGES / PILLS
+           ============================================================ */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: .15em .55em;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .03em;
+        }
+
+        .badge-status-published {
+            background: rgba(14,186,161,.12);
+            color: var(--color-primary-dark);
+            border: 1px solid rgba(14,186,161,.25);
+        }
+        [data-theme='dark'] .badge-status-published {
+            background: rgba(14,186,161,.15);
+            color: var(--color-primary-lighter);
+        }
+        .badge-status-draft {
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .badge-entity {
+            background: rgba(14,186,161,.08);
+            color: var(--color-primary-dark);
+            border: 1px solid rgba(14,186,161,.2);
+        }
+        [data-theme='dark'] .badge-entity {
+            background: rgba(14,186,161,.12);
+            color: var(--color-primary-lighter);
+        }
+
+        /* Audit event type badges */
+        .badge-insert     { background:rgba(14,186,161,.1); color:var(--color-primary-dark); border:1px solid rgba(14,186,161,.25); }
+        .badge-update     { background:rgba(59,130,246,.1); color:#1d4ed8; border:1px solid rgba(59,130,246,.25); }
+        .badge-remove     { background:rgba(239,68,68,.1);  color:#b91c1c; border:1px solid rgba(239,68,68,.25); }
+        .badge-associate  { background:rgba(168,85,247,.1); color:#7e22ce; border:1px solid rgba(168,85,247,.25); }
+        .badge-dissociate { background:rgba(245,158,11,.1); color:#b45309; border:1px solid rgba(245,158,11,.25); }
+
+        [data-theme='dark'] .badge-insert     { background:rgba(14,186,161,.14);  color:var(--color-primary-lighter); border-color:rgba(14,186,161,.3); }
+        [data-theme='dark'] .badge-update     { background:rgba(59,130,246,.14);  color:#93c5fd; border-color:rgba(59,130,246,.3); }
+        [data-theme='dark'] .badge-remove     { background:rgba(239,68,68,.14);   color:#fca5a5; border-color:rgba(239,68,68,.3); }
+        [data-theme='dark'] .badge-associate  { background:rgba(168,85,247,.14);  color:#d8b4fe; border-color:rgba(168,85,247,.3); }
+        [data-theme='dark'] .badge-dissociate { background:rgba(245,158,11,.14);  color:#fcd34d; border-color:rgba(245,158,11,.3); }
+
+        /* ============================================================
+           FLASH MESSAGES
+           ============================================================ */
+        .flash {
+            padding: .75rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            font-size: .875rem;
+            border: 1px solid transparent;
+        }
+        .flash-success { background:rgba(14,186,161,.08); border-color:rgba(14,186,161,.25); color:var(--color-primary-dark); }
+        .flash-error   { background:rgba(239,68,68,.08);  border-color:rgba(239,68,68,.25);  color:#b91c1c; }
+        .flash-info    { background:rgba(59,130,246,.08); border-color:rgba(59,130,246,.25); color:#1d4ed8; }
+        [data-theme='dark'] .flash-success { color:var(--color-primary-lighter); }
+        [data-theme='dark'] .flash-error   { color:#fca5a5; }
+        [data-theme='dark'] .flash-info    { color:#93c5fd; }
+
+        /* ============================================================
+           PAGE HEADINGS
+           ============================================================ */
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }
+        .page-subtitle {
+            font-size: .875rem;
+            color: var(--text-muted);
+            margin-top: .25rem;
+        }
+
+        .back-link {
+            font-size: .8rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            margin-bottom: 1.25rem;
+            transition: color .15s;
+        }
+        .back-link:hover { color: var(--color-primary); }
+
+        /* ============================================================
+           GRID LAYOUTS
+           ============================================================ */
+        .grid-cards-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+        .grid-cards-4 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .grid-main-aside { grid-template-columns: 1fr 300px; gap: 1.5rem; }
+
+        @media (max-width: 900px) {
+            .grid-main-aside { grid-template-columns: 1fr; }
+            .navbar-links { display: none; }
+        }
+
+        /* ============================================================
+           EMPTY STATE
+           ============================================================ */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state p { font-size: .9375rem; margin: 0; }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        .site-footer {
+            margin-top: 4rem;
+            padding: 1.5rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: .8rem;
+            color: var(--text-subtle);
+        }
+        .site-footer a { color: var(--color-primary); }
+        .site-footer a:hover { color: var(--color-primary-dark); }
+
+        /* ============================================================
+           AUDIT CHAIN LINK
+           ============================================================ */
+        .tx-link {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .72rem;
+            color: var(--color-primary);
+            transition: color .15s;
+        }
+        .tx-link:hover { color: var(--color-primary-dark); }
+
+        /* ============================================================
+           MISC
+           ============================================================ */
+        .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+        .text-muted   { color: var(--text-muted); }
+        .text-heading { color: var(--text-heading); }
+        .text-primary { color: var(--color-primary); }
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: .15em .55em;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .code-inline {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .8em;
+            background: rgba(14,186,161,.07);
+            border: 1px solid rgba(14,186,161,.18);
+            border-radius: 4px;
+            padding: .1em .4em;
+            color: var(--color-primary-dark);
+        }
+        [data-theme='dark'] .code-inline {
+            background: rgba(14,186,161,.1);
+            border-color: rgba(14,186,161,.2);
+            color: var(--color-primary-lighter);
+        }
+    </style>
     {% block stylesheets %}{% endblock %}
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen" style="background-color:#0d111d">
+<body>
 
-<nav style="background-color:#111827;border-bottom:1px solid #1f2937" class="sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <div class="flex items-center gap-8">
-                <a href="{{ path('app_home') }}" class="font-bold text-lg tracking-tight" style="color:#818cf8">
-                    AuditorBundle <span style="color:#6b7280;font-weight:400;font-size:.875rem">Demo</span>
-                </a>
-                <div class="hidden md:flex items-center gap-1">
-                    <a href="{{ path('app_home') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Blog</a>
-                    <a href="{{ path('app_post_index') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Posts</a>
-                    <a href="{{ path('app_author_index') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Authors</a>
-                    <a href="{{ path('app_tag_index') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#d1d5db">Tags</a>
-                    {% if is_granted('ROLE_USER') %}
-                    <a href="{{ path('app_audit_history') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#c084fc">Audit History</a>
-                    <a href="{{ path('dh_auditor_list_audits') }}" class="px-3 py-2 rounded-md text-sm font-medium" style="color:#c084fc">Audit Viewer</a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
+<nav class="navbar">
+    <div class="navbar-inner">
+        <div class="flex items-center">
+            <a href="{{ path('app_home') }}" class="navbar-brand">AuditorBundle<span style="font-weight:400;opacity:.6;font-size:.85em"> Demo</span></a>
+            <div class="navbar-links">
+                <a href="{{ path('app_home') }}" class="nav-link">Blog</a>
+                <a href="{{ path('app_post_index') }}" class="nav-link">Posts</a>
+                <a href="{{ path('app_author_index') }}" class="nav-link">Authors</a>
+                <a href="{{ path('app_tag_index') }}" class="nav-link">Tags</a>
                 {% if is_granted('ROLE_USER') %}
-                    <span class="text-sm" style="color:#9ca3af">{{ app.user.name ?? app.user.userIdentifier }}</span>
-                    <a href="{{ path('app_logout') }}" class="px-3 py-1.5 text-sm rounded-md" style="background-color:#1f2937;color:#d1d5db">Logout</a>
-                {% else %}
-                    <a href="{{ path('app_login') }}" class="px-3 py-1.5 text-sm rounded-md text-white" style="background-color:#4f46e5">Login</a>
+                    <a href="{{ path('app_audit_history') }}" class="nav-link audit">Audit History</a>
+                    <a href="{{ path('dh_auditor_list_audits') }}" class="nav-link audit">Audit Viewer</a>
                 {% endif %}
             </div>
+        </div>
+        <div class="navbar-right">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                <span class="icon-sun">☀️</span>
+                <span class="icon-moon">🌙</span>
+            </button>
+            {% if is_granted('ROLE_USER') %}
+                <span class="user-name">{{ app.user.name ?? app.user.userIdentifier }}</span>
+                <a href="{{ path('app_logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn btn-primary btn-sm">Login</a>
+            {% endif %}
         </div>
     </div>
 </nav>
 
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<main class="container py-8">
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div class="mb-4 px-4 py-3 rounded-lg" style="{% if label == 'success' %}background-color:rgba(20,83,45,.5);border:1px solid #15803d;color:#bbf7d0{% elseif label == 'error' %}background-color:rgba(127,29,29,.5);border:1px solid #b91c1c;color:#fecaca{% else %}background-color:rgba(30,58,138,.5);border:1px solid #1d4ed8;color:#bfdbfe{% endif %}">
+            <div class="flash flash-{{ label == 'success' ? 'success' : (label == 'error' ? 'error' : 'info') }}">
                 {{ message }}
             </div>
         {% endfor %}
@@ -51,9 +567,19 @@
     {% block body %}{% endblock %}
 </main>
 
-<footer class="mt-16 py-6 text-center text-sm" style="border-top:1px solid #1f2937;color:#4b5563">
-    <p>AuditorBundle Demo &mdash; <a href="https://github.com/DamienHarper/auditor-bundle" style="color:#6366f1">damienharper/auditor-bundle</a> v7</p>
+<footer class="site-footer">
+    <p>AuditorBundle Demo &mdash; <a href="https://github.com/DamienHarper/auditor-bundle">damienharper/auditor-bundle</a> v7</p>
 </footer>
+
+<script>
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+        var html = document.documentElement;
+        var current = html.getAttribute('data-theme') || 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+    });
+</script>
 
 {% block javascripts %}{% endblock %}
 </body>

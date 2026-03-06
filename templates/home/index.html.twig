@@ -5,56 +5,46 @@
 {% block body %}
 <div class="flex items-center justify-between mb-8">
     <div>
-        <h1 class="text-3xl font-bold text-white">Blog</h1>
-        <p class="text-gray-400 mt-1">Published posts</p>
+        <h1 class="page-title">Blog</h1>
+        <p class="page-subtitle">Published posts</p>
     </div>
-    <a href="{{ path('app_post_new') }}" class="px-4 py-2 rounded-lg text-sm font-medium text-white" style="background-color:#4f46e5">
-        + New Post
-    </a>
+    <a href="{{ path('app_post_new') }}" class="btn btn-primary">+ New Post</a>
 </div>
 
 {% if posts is empty %}
-    <div class="text-center py-16" style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem">
-        <p class="text-gray-400 text-lg">No published posts yet.</p>
-        <a href="{{ path('app_post_new') }}" class="mt-4 inline-block px-4 py-2 rounded-lg text-sm text-white" style="background-color:#4f46e5">Create a post</a>
+    <div class="card empty-state">
+        <p>No published posts yet.</p>
+        <a href="{{ path('app_post_new') }}" class="btn btn-primary" style="margin-top:1rem">Create a post</a>
     </div>
 {% else %}
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cards-3">
         {% for post in posts %}
-            <article style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem;overflow:hidden" class="flex flex-col hover:border-indigo-800 transition">
-                <div class="p-6 flex-1">
-                    <div class="flex flex-wrap gap-1.5 mb-3">
+            <article class="card card-hover" style="display:flex;flex-direction:column">
+                <div class="card-body" style="flex:1">
+                    <div class="flex flex-wrap gap-1" style="margin-bottom:.75rem">
                         {% for tag in post.tags %}
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white" style="background-color:{{ tag.color }}">
-                                {{ tag.name }}
-                            </span>
+                            <span class="tag-chip" style="background-color:{{ tag.color }}">{{ tag.name }}</span>
                         {% endfor %}
                     </div>
-                    <h2 class="text-xl font-semibold text-white mb-2">
-                        <a href="{{ path('app_post_show', {id: post.id}) }}" class="hover:text-indigo-300 transition">
+                    <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-heading);margin:0 0 .5rem;line-height:1.3">
+                        <a href="{{ path('app_post_show', {id: post.id}) }}" style="color:inherit;transition:color .15s" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='inherit'">
                             {{ post.title }}
                         </a>
                     </h2>
-                    {% if post.excerpt %}
-                        <p class="text-gray-400 text-sm line-clamp-3">{{ post.excerpt }}</p>
-                    {% else %}
-                        <p class="text-gray-400 text-sm line-clamp-3">{{ post.body|slice(0, 150) }}{% if post.body|length > 150 %}…{% endif %}</p>
-                    {% endif %}
+                    <p style="font-size:.875rem;color:var(--text-muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">
+                        {{ post.excerpt ?? (post.body|slice(0,150) ~ (post.body|length > 150 ? '…' : '')) }}
+                    </p>
                 </div>
-                <div class="px-6 py-4" style="border-top:1px solid #1f2937">
-                    <div class="flex items-center justify-between text-xs text-gray-500">
-                        <span>
-                            {% if post.author %}
-                                by <a href="{{ path('app_author_show', {id: post.author.id}) }}" class="text-indigo-400 hover:text-indigo-300">{{ post.author.name }}</a>
-                                {% if post.coauthor %}
-                                    &amp; <a href="{{ path('app_author_show', {id: post.coauthor.id}) }}" class="text-indigo-400 hover:text-indigo-300">{{ post.coauthor.name }}</a>
-                                {% endif %}
-                            {% else %}
-                                No author
-                            {% endif %}
-                        </span>
-                        <span>{{ post.createdAt ? post.createdAt|date('M d, Y') : '' }}</span>
-                    </div>
+                <div style="padding:.875rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--text-muted)">
+                    <span>
+                        {% if post.author %}
+                            by <a href="{{ path('app_author_show', {id: post.author.id}) }}" class="text-primary" style="font-weight:500">{{ post.author.name }}</a>
+                            {% if post.coauthor %}&amp; <a href="{{ path('app_author_show', {id: post.coauthor.id}) }}" class="text-primary" style="font-weight:500">{{ post.coauthor.name }}</a>{% endif %}
+                        {% else %}
+                            No author
+                        {% endif %}
+                    </span>
+                    <span>{{ post.createdAt ? post.createdAt|date('M d, Y') : '' }}</span>
                 </div>
             </article>
         {% endfor %}

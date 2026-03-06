@@ -3,27 +3,27 @@
 {% block title %}New Author — AuditorBundle Demo{% endblock %}
 
 {% block body %}
-<div class="mb-6">
-    <a href="{{ path('app_author_index') }}" class="text-sm text-gray-400 hover:text-gray-300">&larr; Authors</a>
-</div>
+<a href="{{ path('app_author_index') }}" class="back-link">← Authors</a>
 
 <div class="max-w-2xl">
-    <h1 class="text-2xl font-bold text-white mb-6">New Author</h1>
-
-    <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem" class="p-6">
-        {{ form_start(form, {attr: {class: 'space-y-4'}}) }}
-            {% for field in form %}
-                <div>
-                    {{ form_label(field, null, {label_attr: {class: 'block text-sm font-medium text-gray-300 mb-1'}}) }}
-                    {{ form_widget(field) }}
-                    {{ form_errors(field) }}
+    <h1 class="page-title mb-6">New Author</h1>
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form, {attr: {class: 'space-y-4'}}) }}
+                {% for field in form %}
+                    <div>
+                        {{ form_label(field, null, {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(field, {attr: {class: field.vars.block_prefixes|last == 'textarea' ? 'form-textarea' : 'form-input'}}) }}
+                        {{ form_errors(field) }}
+                    </div>
+                {% endfor %}
+                <hr class="divider">
+                <div class="flex gap-3">
+                    <button type="submit" class="btn btn-primary">Save Author</button>
+                    <a href="{{ path('app_author_index') }}" class="btn btn-secondary">Cancel</a>
                 </div>
-            {% endfor %}
-            <div class="flex gap-3 pt-4">
-                <button type="submit" class="px-5 py-2 rounded-lg text-sm font-medium text-white" style="background-color:#4f46e5">Save Author</button>
-                <a href="{{ path('app_author_index') }}" class="px-5 py-2 rounded-lg text-sm font-medium" style="background-color:#1f2937;color:#d1d5db">Cancel</a>
-            </div>
-        {{ form_end(form) }}
+            {{ form_end(form) }}
+        </div>
     </div>
 </div>
 {% endblock %}

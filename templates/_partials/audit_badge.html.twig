@@ -1,10 +1,1 @@
-{% set colors = {
-    'insert': 'background-color:#14532d;color:#86efac;border:1px solid #16a34a',
-    'update': 'background-color:#1e3a5f;color:#93c5fd;border:1px solid #2563eb',
-    'remove': 'background-color:#450a0a;color:#fca5a5;border:1px solid #dc2626',
-    'associate': 'background-color:#2e1065;color:#d8b4fe;border:1px solid #7c3aed',
-    'dissociate': 'background-color:#431407;color:#fdba74;border:1px solid #ea580c',
-} %}
-<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style="{{ colors[type] ?? 'background-color:#1f2937;color:#9ca3af;border:1px solid #374151' }}">
-    {{ type }}
-</span>
+<span class="badge badge-{{ type }}">{{ type }}</span>

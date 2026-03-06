@@ -3,75 +3,78 @@
 {% block title %}Audit History — AuditorBundle Demo{% endblock %}
 
 {% block body %}
-<div class="mb-6">
-    <h1 class="text-3xl font-bold text-white">Audit History</h1>
-    <p class="text-gray-400 mt-1">Custom audit journal — {{ total }} entr{% if total != 1 %}ies{% else %}y{% endif %} total</p>
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="page-title">Audit History</h1>
+        <p class="page-subtitle">{{ total }} entr{% if total != 1 %}ies{% else %}y{% endif %} total</p>
+    </div>
+    <a href="{{ path('dh_auditor_list_audits') }}" class="btn btn-secondary btn-sm">Native viewer →</a>
 </div>
 
 {# Filters #}
 <form method="get" class="flex flex-wrap gap-3 mb-6">
-    <select name="entity" class="rounded-lg text-sm px-3 py-2" style="background-color:#1f2937;color:#d1d5db;border:1px solid #374151">
+    <select name="entity" class="form-select" style="width:auto">
         <option value="">All entities</option>
         {% for entity in auditable_entities %}
             <option value="{{ entity }}" {% if entity_filter == entity %}selected{% endif %}>{{ entity }}</option>
         {% endfor %}
     </select>
-    <select name="type" class="rounded-lg text-sm px-3 py-2" style="background-color:#1f2937;color:#d1d5db;border:1px solid #374151">
+    <select name="type" class="form-select" style="width:auto">
         <option value="">All types</option>
         {% for type in audit_types %}
             <option value="{{ type }}" {% if type_filter == type %}selected{% endif %}>{{ type }}</option>
         {% endfor %}
     </select>
-    <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium text-white" style="background-color:#4f46e5">Filter</button>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
     {% if entity_filter or type_filter %}
-        <a href="{{ path('app_audit_history') }}" class="px-4 py-2 rounded-lg text-sm font-medium" style="background-color:#1f2937;color:#9ca3af">Clear</a>
+        <a href="{{ path('app_audit_history') }}" class="btn btn-ghost btn-sm">Clear</a>
     {% endif %}
 </form>
 
 {% if entries is empty %}
-    <div class="text-center py-16" style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem">
-        <p class="text-gray-400">No audit entries found.</p>
-        <p class="text-gray-600 text-sm mt-2">Run <code class="text-indigo-400">bin/console doctrine:fixtures:load</code> to generate data.</p>
+    <div class="card empty-state">
+        <p>No audit entries found.</p>
+        <p style="font-size:.8rem;color:var(--text-subtle);margin-top:.5rem">Run <span class="code-inline">bin/console doctrine:fixtures:load</span> to generate data.</p>
     </div>
 {% else %}
-    <div style="background-color:#111827;border:1px solid #1f2937;border-radius:.75rem;overflow:hidden">
-        <table class="w-full text-sm">
+    <div class="card">
+        <table class="data-table">
             <thead>
-                <tr style="border-bottom:1px solid #1f2937">
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Entity</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Transaction</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Changes</th>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Entity</th>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Transaction</th>
+                    <th>Changed fields</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in entries %}
                     {% set entry = row.entry %}
-                    <tr style="border-bottom:1px solid #111827" class="hover:bg-gray-900/50 transition">
-                        <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
+                    <tr>
+                        <td class="whitespace-nowrap" style="font-size:.8rem;color:var(--text-muted)">
                             {{ entry.createdAt ? entry.createdAt|date('Y-m-d H:i:s') : '—' }}
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
+                        <td class="whitespace-nowrap">
                             {% include '_partials/audit_badge.html.twig' with {type: entry.type} %}
                         </td>
-                        <td class="px-4 py-3">
-                            <span class="text-xs px-2 py-0.5 rounded" style="background-color:#1e1b4b;color:#a5b4fc;border:1px solid #3730a3">{{ row.entity }}</span>
+                        <td>
+                            <span class="badge badge-entity">{{ row.entity }}</span>
                         </td>
-                        <td class="px-4 py-3 text-xs text-gray-400">#{{ entry.objectId }}</td>
-                        <td class="px-4 py-3 text-xs text-gray-400">{{ entry.username ?? '—' }}</td>
-                        <td class="px-4 py-3">
+                        <td style="font-size:.8rem;color:var(--text-muted)">#{{ entry.objectId }}</td>
+                        <td style="font-size:.8rem;color:var(--text-muted)">{{ entry.username ?? '—' }}</td>
+                        <td>
                             {% if entry.transactionHash %}
-                                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}" class="text-xs font-mono text-purple-400 hover:text-purple-300" title="{{ entry.transactionHash }}">
+                                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}" class="tx-link" title="{{ entry.transactionHash }}">
                                     {{ entry.transactionHash|slice(0, 8) }}…
                                 </a>
                             {% else %}
-                                <span class="text-gray-600">—</span>
+                                <span class="text-muted">—</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3 max-w-xs">
+                        <td style="max-width:220px">
                             {% set diffs = entry.getDiffs() %}
                             {% if diffs is not empty %}
                                 <div class="flex flex-wrap gap-1">
@@ -81,18 +84,14 @@
                                             {% set raw_new = diff.new ?? null %}
                                             {% set old_val = (raw_old is iterable) ? raw_old|json_encode : (raw_old ?? '') %}
                                             {% set new_val = (raw_new is iterable) ? raw_new|json_encode : (raw_new ?? '') %}
-                                            <span class="text-xs px-1.5 py-0.5 rounded" style="background-color:#1f2937;color:#9ca3af" title="{{ field }}: {{ old_val }} → {{ new_val }}">
-                                                {{ field }}
-                                            </span>
+                                            <span class="badge badge-entity" title="{{ field }}: {{ old_val }} → {{ new_val }}">{{ field }}</span>
                                         {% else %}
-                                            <span class="text-xs px-1.5 py-0.5 rounded" style="background-color:#1f2937;color:#9ca3af" title="{{ field }}: {{ diff }}">
-                                                {{ field }}
-                                            </span>
+                                            <span class="badge badge-entity" title="{{ field }}: {{ diff }}">{{ field }}</span>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <span class="text-gray-600 text-xs">—</span>
+                                <span class="text-muted" style="font-size:.8rem">—</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -103,14 +102,14 @@
 
     {# Pagination #}
     {% if num_pages > 1 %}
-        <div class="mt-6 flex items-center justify-between">
-            <p class="text-sm text-gray-400">Page {{ current_page }} of {{ num_pages }}</p>
+        <div class="flex items-center justify-between" style="margin-top:1.5rem">
+            <p class="text-muted" style="font-size:.875rem">Page {{ current_page }} of {{ num_pages }}</p>
             <div class="flex gap-2">
                 {% if has_previous %}
-                    <a href="{{ path('app_audit_history', {page: current_page - 1, entity: entity_filter, type: type_filter}) }}" class="px-3 py-1.5 text-sm rounded" style="background-color:#1f2937;color:#d1d5db">&larr; Previous</a>
+                    <a href="{{ path('app_audit_history', {page: current_page - 1, entity: entity_filter, type: type_filter}) }}" class="btn btn-secondary btn-sm">← Previous</a>
                 {% endif %}
                 {% if has_next %}
-                    <a href="{{ path('app_audit_history', {page: current_page + 1, entity: entity_filter, type: type_filter}) }}" class="px-3 py-1.5 text-sm rounded" style="background-color:#1f2937;color:#d1d5db">Next &rarr;</a>
+                    <a href="{{ path('app_audit_history', {page: current_page + 1, entity: entity_filter, type: type_filter}) }}" class="btn btn-secondary btn-sm">Next →</a>
                 {% endif %}
             </div>
         </div>
