@@ -32,7 +32,8 @@
         "doctrine/doctrine-fixtures-bundle": "^4.0",
         "symfony/maker-bundle": "^1.0",
         "symfony/stopwatch": "8.*",
-        "symfony/web-profiler-bundle": "8.*"
+        "symfony/web-profiler-bundle": "8.*",
+        "zenstruck/foundry": "^2.9"
     },
     "config": {
         "allow-plugins": {
