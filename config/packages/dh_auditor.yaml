@@ -1,20 +1,49 @@
+# Every auditor-bundle option is listed here: the ones the demo uses are active,
+# the others are commented out with an example value.
 dh_auditor:
     enabled: true
     timezone: 'Europe/Paris'
+    # user_provider: 'dh_auditor.user_provider'          # service resolving the current user (blame)
+    # security_provider: 'dh_auditor.security_provider'  # service resolving IP and firewall
+    # role_checker: 'dh_auditor.role_checker'            # service deciding who can view audits
+    # extra_data_provider: ~                             # service adding extra_data to each entry
+
     providers:
         doctrine:
+            # table_prefix: ''
             table_suffix: '_audit'
-            full_snapshot_on_remove: true
-            ignored_columns:
-                - created_at
-                - updated_at
-            entities:
-                App\Entity\Author: ~
-                App\Entity\Post: ~
-                App\Entity\Comment: ~
-                App\Entity\Tag: ~
+
+            # Doctrine *property* names (not SQL column names), ignored for every entity.
+            # The demo ignores createdAt/updatedAt with #[Audit\Ignore] on the entities instead.
+            # ignored_columns:
+            #     - createdAt
+            #     - updatedAt
+
+            full_snapshot_on_remove: true    # store every field value in REMOVE entries
+            # utf8_convert: false            # legacy mb_convert_encoding() pass (opt-in)
+
+            # Auditable entities are declared with #[Audit\Auditable]; YAML can declare them too
+            # and add per-entity options:
+            # entities:
+            #     App\Entity\Post:
+            #         ignored_columns: [excerpt]
+            #         roles:
+            #             view: [ROLE_ADMIN]
+            #         retention:
+            #             max_age: 'P1Y'       # ISO 8601 duration, applied by audit:clean
+            #             max_entries: 500
+
             storage_services:
                 - '@doctrine.orm.default_entity_manager'
+            # auditing_services:
+            #     - '@doctrine.orm.default_entity_manager'
+            # storage_mapper: ~              # required with several storage services
+
             viewer:
                 enabled: true
                 page_size: 25
+
+            # Scheduled pruning (needs symfony/scheduler, symfony/messenger, dragonmantank/cron-expression)
+            # retention:
+            #     schedule: '0 3 * * *'
+            #     default_max_age: 'P2Y'

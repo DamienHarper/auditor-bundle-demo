@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TagRepository;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Attribute as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
