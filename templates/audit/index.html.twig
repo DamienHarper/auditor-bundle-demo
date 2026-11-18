@@ -66,9 +66,9 @@
                         <td style="font-size:.8rem;color:var(--text-muted)">#{{ entry.objectId }}</td>
                         <td style="font-size:.8rem;color:var(--text-muted)">{{ entry.username ?? '—' }}</td>
                         <td>
-                            {% if entry.transactionHash %}
-                                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}" class="tx-link" title="{{ entry.transactionHash }}">
-                                    {{ entry.transactionHash|slice(0, 8) }}…
+                            {% if entry.transactionId %}
+                                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionId}) }}" class="tx-link" title="{{ entry.transactionId }}">
+                                    …{{ entry.transactionId|slice(-8) }}
                                 </a>
                             {% else %}
                                 <span class="text-muted">—</span>

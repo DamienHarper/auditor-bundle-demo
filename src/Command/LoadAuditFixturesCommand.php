@@ -19,11 +19,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  *
  * La commande doctrine:fixtures:load enveloppe tout le chargement dans un
  * wrapInTransaction(), ce qui fait que tous les flush() partagent la même
- * transaction SQL et donc le même transaction_hash dans l'audit.
+ * transaction SQL et donc le même transaction_id dans l'audit.
  *
  * Cette commande appelle AppFixtures::load() directement, sans transaction
  * englobante, afin que chaque flush() dispose de sa propre transaction SQL
- * et de son propre transaction_hash d'audit.
+ * et de son propre transaction_id d'audit.
  */
 #[AsCommand(
     name: 'app:fixtures:load',
@@ -58,7 +58,7 @@ class LoadAuditFixturesCommand extends Command
         $io->section('Chargement des fixtures (14 lots)');
 
         // Appel DIRECT sans wrapInTransaction() : chaque flush() sera
-        // sa propre transaction SQL et générera un transaction_hash unique.
+        // sa propre transaction SQL et générera un transaction_id unique.
         $this->fixtures->load($this->em);
 
         $io->success('Fixtures chargées avec succès !');
@@ -107,7 +107,7 @@ class LoadAuditFixturesCommand extends Command
         $auditRows = [];
         foreach (self::AUDIT_TABLES as $table) {
             $total = $connection->fetchOne('SELECT count(*) FROM ' . $table);
-            $txCount = $connection->fetchOne('SELECT count(DISTINCT transaction_hash) FROM ' . $table);
+            $txCount = $connection->fetchOne('SELECT count(DISTINCT transaction_id) FROM ' . $table);
             $auditRows[] = [$table, $total, $txCount];
         }
 

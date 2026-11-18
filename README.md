@@ -1,12 +1,12 @@
 # auditor-bundle Demo
 
-A demo application showcasing **[damienharper/auditor-bundle](https://github.com/DamienHarper/auditor-bundle) v7** with Symfony 8.
+A demo application showcasing **[damienharper/auditor-bundle](https://github.com/DamienHarper/auditor-bundle) v8** with Symfony 8.1, running the latest unreleased development branches of the auditor family.
 
 ## Stack
 
-- PHP 8.4+ / Symfony 8.x
-- Doctrine ORM 3.2+ / DBAL 4.0+
-- auditor-bundle ^7.0
+- PHP 8.4+ / Symfony 8.1
+- Doctrine ORM 3.8+ / DBAL 4.6+
+- auditor `5.x-dev`, auditor-doctrine-provider `2.x-dev`, auditor-bundle `8.x-dev` (development branches, not yet released)
 - SQLite (single file)
 - Tailwind CSS 4 via CDN
 
@@ -16,8 +16,17 @@ A demo application showcasing **[damienharper/auditor-bundle](https://github.com
 composer install
 php bin/console doctrine:migrations:migrate --no-interaction
 php bin/console audit:schema:update --force
-php bin/console doctrine:fixtures:load --no-interaction
+php bin/console app:fixtures:load --no-interaction
 symfony server:start
+```
+
+The audit tables are managed by `audit:schema:update`, not by the Doctrine migrations.
+
+### Upgrading an existing demo database (audit schema v1)
+
+```bash
+php bin/console audit:schema:migrate --force --convert-all
+php bin/console audit:schema:update --force
 ```
 
 ## URLs
@@ -32,7 +41,10 @@ symfony server:start
 | `/history` | **Custom audit journal** (filtered, paginated) |
 | `/audit` | **Native auditor-bundle viewer** |
 | `/audit/App-Entity-Post/{id}` | Entity-specific audit stream |
-| `/audit/transaction/{hash}` | Transaction audit stream |
+| `/audit/transaction/{id}` | Transaction audit stream (ULID) |
+| `/audit/user/{id}` | Per-user audit timeline |
+| `/audit/App-Entity-Post/{id}/revisions` | Pick two revisions to compare |
+| `/audit/export?format=csv\|json\|ndjson` | Audit export (`entity`, `id`, `blame_id`, `from`, `to`, `anonymize`) |
 
 ## Fixture Lots
 
