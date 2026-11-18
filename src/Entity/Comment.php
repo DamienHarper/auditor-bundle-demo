@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CommentRepository;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Attribute as Audit;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
