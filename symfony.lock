@@ -237,12 +237,12 @@
         "version": "v3.23.0"
     },
     "zenstruck/foundry": {
-        "version": "2.9",
+        "version": "2.16",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "2.7",
-            "ref": "7fc98f546dfeaa83cc2110634f8ff078d070b965"
+            "version": "2.15",
+            "ref": "ce0c9d62f1d5192dcd958c2f2f21fd8d9c23dcaa"
         },
         "files": [
             "config/packages/zenstruck_foundry.yaml",
