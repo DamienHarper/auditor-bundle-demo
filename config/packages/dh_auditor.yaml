@@ -4,6 +4,7 @@ dh_auditor:
     providers:
         doctrine:
             table_suffix: '_audit'
+            full_snapshot_on_remove: true
             ignored_columns:
                 - created_at
                 - updated_at
