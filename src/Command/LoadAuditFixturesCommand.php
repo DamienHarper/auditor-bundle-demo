@@ -27,12 +27,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 #[AsCommand(
     name: 'app:fixtures:load',
-    description: 'Charge les fixtures de démo avec des transactions d\'audit distinctes (14 lots).',
+    description: 'Charge les fixtures de démo avec des transactions d\'audit distinctes (16 lots).',
 )]
 class LoadAuditFixturesCommand extends Command
 {
     /** Tables d'audit à vider avant le rechargement */
     private const AUDIT_TABLES = ['author_audit', 'post_audit', 'comment_audit', 'tag_audit'];
+
+    /** Index des racines d'audit (#[AuditRoot]), alimenté à l'écriture des entrées */
+    private const AUDIT_ROOT_TABLE = 'audit_root';
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -55,7 +58,7 @@ class LoadAuditFixturesCommand extends Command
             $this->purge($io);
         }
 
-        $io->section('Chargement des fixtures (14 lots)');
+        $io->section('Chargement des fixtures (16 lots)');
 
         // Appel DIRECT sans wrapInTransaction() : chaque flush() sera
         // sa propre transaction SQL et générera un transaction_id unique.
@@ -78,7 +81,7 @@ class LoadAuditFixturesCommand extends Command
 
         // Vider les tables d'audit (non gérées par l'ORM)
         $connection = $this->em->getConnection();
-        foreach (self::AUDIT_TABLES as $table) {
+        foreach ([...self::AUDIT_TABLES, self::AUDIT_ROOT_TABLE] as $table) {
             $connection->executeStatement('DELETE FROM ' . $table);
         }
 
@@ -113,5 +116,6 @@ class LoadAuditFixturesCommand extends Command
 
         $io->table(['Table', 'Enregistrements'], $rows);
         $io->table(['Table d\'audit', 'Entrées totales', 'Transactions distinctes'], $auditRows);
+        $io->text(\sprintf('Index des racines (%s) : %d lignes.', self::AUDIT_ROOT_TABLE, $connection->fetchOne('SELECT count(*) FROM ' . self::AUDIT_ROOT_TABLE)));
     }
 }

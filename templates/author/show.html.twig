@@ -2,6 +2,11 @@
 
 {% block title %}{{ author.name }} — AuditorBundle Demo{% endblock %}
 
+{% block stylesheets %}
+    {# the DhAuditor:History component is styled with the Tailwind classes of the viewer #}
+    <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
+{% endblock %}
+
 {% block body %}
 <a href="{{ path('app_author_index') }}" class="back-link">← Authors</a>
 
@@ -39,7 +44,7 @@
                     {% for post in author.posts %}
                         <div class="flex items-center justify-between" style="padding:.65rem 1.25rem;border-bottom:1px solid var(--border)">
                             <a href="{{ path('app_post_show', {id: post.id}) }}" class="text-primary" style="font-size:.875rem;font-weight:500">{{ post.title }}</a>
-                            <span class="badge badge-status-{{ post.status }}">{{ post.status }}</span>
+                            <span class="badge badge-status-{{ post.status.value }}">{{ post.status.label }}</span>
                         </div>
                     {% endfor %}
                 </div>
@@ -48,31 +53,15 @@
     </div>
 
     <div class="space-y-4">
-        <div class="card">
-            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-                <span>Recent Audits</span>
-                <a href="{{ path('dh_auditor_show_entity_stream', {entity: 'App-Entity-Author', id: author.id}) }}" class="text-primary" style="font-size:.75rem;font-weight:500;text-transform:none;letter-spacing:0">View all →</a>
-            </div>
-            <div class="card-body">
-                {% if audits is empty %}
-                    <p class="text-muted" style="font-size:.875rem;margin:0">No audit entries yet.</p>
-                {% else %}
-                    <div class="space-y-3">
-                        {% for entry in audits %}
-                            <div>
-                                <div class="flex items-center gap-2" style="margin-bottom:.2rem">
-                                    {% include '_partials/audit_badge.html.twig' with {type: entry.type} %}
-                                    <span class="text-muted" style="font-size:.75rem">{{ entry.createdAt ? entry.createdAt|date('M d, H:i') : '' }}</span>
-                                </div>
-                                {% if entry.username %}
-                                    <p class="text-muted" style="font-size:.75rem;margin:0">by {{ entry.username }}</p>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+        {{ include('_partials/last_changes.html.twig', {subject: author, fields: ['name', 'email', 'bio']}) }}
     </div>
+</div>
+
+{# History of the author, of their posts (#[AuditRoot('author')] on Post) and of the comments on them
+   (#[AuditRoot('post.author')] on Comment) #}
+<div style="margin-top:1.5rem">
+    <twig:DhAuditor:History :subject="author" :limit="40">
+        <twig:block name="title">History of {{ author.name }} and their posts</twig:block>
+    </twig:DhAuditor:History>
 </div>
 {% endblock %}

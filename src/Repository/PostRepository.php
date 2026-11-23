@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Post;
+use App\Entity\PostStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,7 +24,7 @@ class PostRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.status = :status')
-            ->setParameter('status', 'published')
+            ->setParameter('status', PostStatus::Published)
             ->leftJoin('p.author', 'a')
             ->leftJoin('p.tags', 't')
             ->addSelect('a', 't')

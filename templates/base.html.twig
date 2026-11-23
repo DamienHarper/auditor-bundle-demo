@@ -10,9 +10,14 @@
             var theme = localStorage.getItem('theme') ||
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', theme);
+            // the bundle templates (viewer, History component) switch their dark: classes on a "dark" class
+            document.documentElement.classList.toggle('dark', theme === 'dark');
         })();
     </script>
     <style>
+        /* same layer order as Tailwind 4 (bundles/dhauditor/app.css) */
+        @layer theme, base, components, utilities;
+
         /* ============================================================
            VARIABLES — same palette as auditor-docs
            ============================================================ */
@@ -101,38 +106,42 @@
            LAYOUT UTILITIES
            ============================================================ */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-1 { gap: .25rem; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; }
-        .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; } .gap-8 { gap: 2rem; }
-        .flex-wrap { flex-wrap: wrap; }
-        .flex-1 { flex: 1; }
-        .grid { display: grid; }
-        .hidden { display: none; }
-        .mt-1  { margin-top: .25rem; }  .mt-2  { margin-top: .5rem; }
-        .mt-4  { margin-top: 1rem; }    .mt-6  { margin-top: 1.5rem; }
-        .mb-2  { margin-bottom: .5rem; }.mb-4  { margin-bottom: 1rem; }
-        .mb-6  { margin-bottom: 1.5rem; }.mb-8  { margin-bottom: 2rem; }
-        .ml-4  { margin-left: 1rem; }
-        .py-8  { padding-top: 2rem; padding-bottom: 2rem; }
-        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
-        .py-6  { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-        .text-center { text-align: center; }
-        .text-right  { text-align: right; }
-        .text-sm     { font-size: .875rem; }
-        .text-xs     { font-size: .75rem; }
-        .font-semibold { font-weight: 600; }
-        .font-bold     { font-weight: 700; }
-        .italic { font-style: italic; }
-        .w-full { width: 100%; }
-        .max-w-2xl { max-width: 42rem; }
-        .max-w-3xl { max-width: 48rem; }
-        .max-w-md  { max-width: 28rem; }
-        .space-y-4 > * + * { margin-top: 1rem; }
-        .space-y-3 > * + * { margin-top: .75rem; }
-        .space-y-6 > * + * { margin-top: 1.5rem; }
-        .whitespace-nowrap { white-space: nowrap; }
+        /* in the "utilities" layer of Tailwind: on the pages that load the viewer stylesheet
+           (History component), its responsive classes (sm:inline…) win over these ones */
+        @layer utilities {
+            .flex { display: flex; }
+            .items-center { align-items: center; }
+            .justify-between { justify-content: space-between; }
+            .gap-1 { gap: .25rem; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; }
+            .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; } .gap-8 { gap: 2rem; }
+            .flex-wrap { flex-wrap: wrap; }
+            .flex-1 { flex: 1; }
+            .grid { display: grid; }
+            .hidden { display: none; }
+            .mt-1  { margin-top: .25rem; }  .mt-2  { margin-top: .5rem; }
+            .mt-4  { margin-top: 1rem; }    .mt-6  { margin-top: 1.5rem; }
+            .mb-2  { margin-bottom: .5rem; }.mb-4  { margin-bottom: 1rem; }
+            .mb-6  { margin-bottom: 1.5rem; }.mb-8  { margin-bottom: 2rem; }
+            .ml-4  { margin-left: 1rem; }
+            .py-8  { padding-top: 2rem; padding-bottom: 2rem; }
+            .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+            .py-6  { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+            .text-center { text-align: center; }
+            .text-right  { text-align: right; }
+            .text-sm     { font-size: .875rem; }
+            .text-xs     { font-size: .75rem; }
+            .font-semibold { font-weight: 600; }
+            .font-bold     { font-weight: 700; }
+            .italic { font-style: italic; }
+            .w-full { width: 100%; }
+            .max-w-2xl { max-width: 42rem; }
+            .max-w-3xl { max-width: 48rem; }
+            .max-w-md  { max-width: 28rem; }
+            .space-y-4 > * + * { margin-top: 1rem; }
+            .space-y-3 > * + * { margin-top: .75rem; }
+            .space-y-6 > * + * { margin-top: 1.5rem; }
+            .whitespace-nowrap { white-space: nowrap; }
+        }
 
         /* ============================================================
            NAVBAR
@@ -370,6 +379,14 @@
             background: rgba(14,186,161,.15);
             color: var(--color-primary-lighter);
         }
+        .badge-status-archived {
+            background: rgba(245,158,11,.1);
+            color: #b45309;
+            border: 1px solid rgba(245,158,11,.3);
+        }
+        [data-theme='dark'] .badge-status-archived {
+            color: #fbbf24;
+        }
         .badge-status-draft {
             background: var(--bg-surface);
             color: var(--text-muted);
@@ -385,19 +402,6 @@
             background: rgba(14,186,161,.12);
             color: var(--color-primary-lighter);
         }
-
-        /* Audit event type badges */
-        .badge-insert     { background:rgba(14,186,161,.1); color:var(--color-primary-dark); border:1px solid rgba(14,186,161,.25); }
-        .badge-update     { background:rgba(59,130,246,.1); color:#1d4ed8; border:1px solid rgba(59,130,246,.25); }
-        .badge-remove     { background:rgba(239,68,68,.1);  color:#b91c1c; border:1px solid rgba(239,68,68,.25); }
-        .badge-associate  { background:rgba(168,85,247,.1); color:#7e22ce; border:1px solid rgba(168,85,247,.25); }
-        .badge-dissociate { background:rgba(245,158,11,.1); color:#b45309; border:1px solid rgba(245,158,11,.25); }
-
-        [data-theme='dark'] .badge-insert     { background:rgba(14,186,161,.14);  color:var(--color-primary-lighter); border-color:rgba(14,186,161,.3); }
-        [data-theme='dark'] .badge-update     { background:rgba(59,130,246,.14);  color:#93c5fd; border-color:rgba(59,130,246,.3); }
-        [data-theme='dark'] .badge-remove     { background:rgba(239,68,68,.14);   color:#fca5a5; border-color:rgba(239,68,68,.3); }
-        [data-theme='dark'] .badge-associate  { background:rgba(168,85,247,.14);  color:#d8b4fe; border-color:rgba(168,85,247,.3); }
-        [data-theme='dark'] .badge-dissociate { background:rgba(245,158,11,.14);  color:#fcd34d; border-color:rgba(245,158,11,.3); }
 
         /* ============================================================
            FLASH MESSAGES
@@ -576,7 +580,7 @@
 </main>
 
 <footer class="site-footer">
-    <p>AuditorBundle Demo &mdash; <a href="https://github.com/DamienHarper/auditor-bundle">damienharper/auditor-bundle</a> v7</p>
+    <p>AuditorBundle Demo &mdash; <a href="https://github.com/DamienHarper/auditor-bundle">damienharper/auditor-bundle</a> v8</p>
 </footer>
 
 <script>
@@ -585,7 +589,10 @@
         var current = html.getAttribute('data-theme') || 'light';
         var next = current === 'dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', next);
+        html.classList.toggle('dark', next === 'dark');
         localStorage.setItem('theme', next);
+        // the viewer keeps its own theme: open it in the same one
+        localStorage.setItem('dh_auditor_theme', next);
     });
 </script>
 

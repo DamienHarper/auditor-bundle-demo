@@ -20,13 +20,24 @@ dh_auditor:
             #     - updatedAt
 
             full_snapshot_on_remove: true    # store every field value in REMOVE entries
+
+            # Label of an entity written in the diffs ("Jane’s comment" rather than "Comment #12 by Jane")
+            entity_label_resolver: App\Audit\EntityLabelResolver
+            # root_resolver: ~               # service returning extra audit roots of an object
+            # read_scope: ~                  # service restricting every query of the reader (multi-tenancy…)
+            # batch_size: 0                  # multi-row INSERTs for audit entries (0: one INSERT per entry)
+            # compression: false             # compress the diffs/extra_data columns (MariaDB only)
+            # skip_disabled_entities: false  # no audit table for entities disabled by their configuration
+            # ignored_columns_resolver: ~    # service returning the properties to ignore for an object
             # utf8_convert: false            # legacy mb_convert_encoding() pass (opt-in)
 
             # Auditable entities are declared with #[Audit\Auditable]; YAML can declare them too
             # and add per-entity options:
             # entities:
             #     App\Entity\Post:
+            #         roots: [author]          # same as #[Audit\AuditRoot('author')]
             #         ignored_columns: [excerpt]
+            #         audited_columns: [title, status]   # allowlist (ignoring always wins)
             #         roles:
             #             view: [ROLE_ADMIN]
             #         retention:

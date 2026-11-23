@@ -6,87 +6,74 @@ use App\Entity\Author;
 use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\Tag;
+use DH\Auditor\History\HistoryGrouper;
+use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
+use DH\AuditorBundle\Viewer\HistoryRows;
+use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * A journal of the whole blog built in the application: one line per action (a transaction, whatever the tables it
+ * wrote to), told as a phrase, with the rows of the viewer.
+ */
 #[Route('/history')]
 class AuditController extends AbstractController
 {
-    private const AUDITABLE_ENTITIES = [
+    private const array AUDITABLE_ENTITIES = [
         'Author' => Author::class,
         'Post' => Post::class,
         'Comment' => Comment::class,
         'Tag' => Tag::class,
     ];
 
-    private const AUDIT_TYPES = ['insert', 'update', 'remove', 'associate', 'dissociate'];
+    private const int PAGE_SIZE = 25;
 
     #[Route('', name: 'app_audit_history', methods: ['GET'])]
-    public function index(Request $request, Reader $reader): Response
+    public function index(Request $request, Reader $reader, Connection $connection, HistoryRows $historyRows): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
-        $entityFilter = $request->query->get('entity', '');
-        $typeFilter = $request->query->get('type', '');
-        $pageSize = 25;
+        $entityFilter = $request->query->getString('entity');
+        $entities = isset(self::AUDITABLE_ENTITIES[$entityFilter])
+            ? [self::AUDITABLE_ENTITIES[$entityFilter]]
+            : array_values(self::AUDITABLE_ENTITIES);
 
-        $allEntries = [];
+        // 1. The transactions of the page, most recent first, across the audit tables.
+        $union = implode(' UNION ALL ', array_map(
+            static fn (string $entity): string => \sprintf('SELECT transaction_id, created_at FROM %s', $reader->getEntityAuditTableName($entity)),
+            $entities,
+        ));
+        $transactionIds = $connection->fetchFirstColumn(\sprintf(
+            'SELECT transaction_id FROM (%s) a WHERE transaction_id IS NOT NULL GROUP BY transaction_id ORDER BY MAX(created_at) DESC LIMIT %d OFFSET %d',
+            $union,
+            self::PAGE_SIZE + 1,
+            ($page - 1) * self::PAGE_SIZE,
+        ));
+        $hasNext = \count($transactionIds) > self::PAGE_SIZE;
+        $transactionIds = \array_slice($transactionIds, 0, self::PAGE_SIZE);
 
-        $entitiesToQuery = '' !== $entityFilter && isset(self::AUDITABLE_ENTITIES[$entityFilter])
-            ? [$entityFilter => self::AUDITABLE_ENTITIES[$entityFilter]]
-            : self::AUDITABLE_ENTITIES;
-
-        foreach ($entitiesToQuery as $label => $entityClass) {
-            try {
-                $options = ['page_size' => null, 'page' => null];
-                if ('' !== $typeFilter) {
-                    $options['type'] = $typeFilter;
-                }
-                $query = $reader->createQuery($entityClass, $options);
-                $entries = $query->execute();
-                foreach ($entries as $entry) {
-                    $allEntries[] = ['entity' => $label, 'entry' => $entry];
-                }
-            } catch (\Throwable) {
-                // audit table may not exist yet
+        // 2. Their entries, read through the Reader (roles, timezone, Entry model), most recent first.
+        $entries = [];
+        if ([] !== $transactionIds) {
+            foreach ($entities as $entity) {
+                $entries = [...$entries, ...$reader->createQuery($entity, ['transaction_id' => $transactionIds, 'page_size' => null])->execute()];
             }
         }
+        usort($entries, static fn (Entry $a, Entry $b): int => strcmp($b->getSortKey(), $a->getSortKey()));
 
-        // Sort by created_at DESC
-        usort($allEntries, static function (array $a, array $b): int {
-            $dateA = $a['entry']->createdAt;
-            $dateB = $b['entry']->createdAt;
-            if ($dateA === $dateB) {
-                return $b['entry']->id <=> $a['entry']->id;
-            }
-            if (null === $dateA) {
-                return 1;
-            }
-            if (null === $dateB) {
-                return -1;
-            }
-
-            return $dateB <=> $dateA;
-        });
-
-        $total = count($allEntries);
-        $numPages = max(1, (int) ceil($total / $pageSize));
-        $offset = ($page - 1) * $pageSize;
-        $entries = array_slice($allEntries, $offset, $pageSize);
+        // 3. One action per transaction, told as a phrase ("alice moved the post from Draft to Published").
+        $rows = $historyRows->build(HistoryGrouper::byTransaction($entries), withContext: true);
 
         return $this->render('audit/index.html.twig', [
-            'entries' => $entries,
+            'rows' => $rows,
             'entity_filter' => $entityFilter,
-            'type_filter' => $typeFilter,
             'auditable_entities' => array_keys(self::AUDITABLE_ENTITIES),
-            'audit_types' => self::AUDIT_TYPES,
             'current_page' => $page,
-            'num_pages' => $numPages,
-            'total' => $total,
             'has_previous' => $page > 1,
-            'has_next' => $page < $numPages,
+            'has_next' => $hasNext,
         ]);
     }
 }

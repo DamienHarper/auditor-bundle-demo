@@ -5,8 +5,14 @@ namespace App\DataFixtures;
 use App\Entity\Author;
 use App\Entity\Comment;
 use App\Entity\Post;
+use App\Entity\PostStatus;
 use App\Entity\Tag;
 use App\Entity\User;
+use DH\Auditor\Auditor;
+use DH\Auditor\Blame\BlameContext;
+use DH\Auditor\Blame\BlameContextStack;
+use DH\Auditor\Provider\Doctrine\Auditing\Snapshot\Snapshotter;
+use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -14,14 +20,62 @@ use function Zenstruck\Foundry\faker;
 
 class AppFixtures extends Fixture
 {
-    public function __construct(private readonly UserPasswordHasherInterface $hasher) {}
+    public function __construct(
+        private readonly UserPasswordHasherInterface $hasher,
+        private readonly Auditor $auditor,
+        private readonly BlameContextStack $blameContextStack,
+    ) {}
 
     public function load(ObjectManager $manager): void
     {
         $faker = faker();
 
         // ====================================================================
-        // LOT 1 -- Utilisateurs (3) + Auteurs (15) + Tags (15)  ~33 inserts
+        // LOT 0 -- Tags (15) crees AVANT l'activation de l'audit, puis
+        //          audit:snapshot : 15 entrees "snapshot" (etat initial)
+        // ====================================================================
+
+        $this->auditor->getConfiguration()->disable();
+        try {
+            $tags = [];
+            foreach ([
+                ['php',            '#8b5cf6'],
+                ['symfony',        '#3b82f6'],
+                ['doctrine',       '#10b981'],
+                ['auditor',        '#f59e0b'],
+                ['best-practices', '#ef4444'],
+                ['security',       '#dc2626'],
+                ['performance',    '#16a34a'],
+                ['testing',        '#9333ea'],
+                ['api-design',     '#0891b2'],
+                ['ddd',            '#b45309'],
+                ['architecture',   '#1d4ed8'],
+                ['devops',         '#475569'],
+                ['javascript',     '#ca8a04'],
+                ['database',       '#0f766e'],
+                ['clean-code',     '#be185d'],
+            ] as [$name, $color]) {
+                $tag = new Tag();
+                $tag->setName($name)->setColor($color);
+                $manager->persist($tag);
+                $tags[] = $tag;
+            }
+
+            $manager->flush(); // aucune entree d'audit : l'audit est desactive
+        } finally {
+            $this->auditor->getConfiguration()->enable();
+        }
+
+        // Ce que fait `bin/console audit:snapshot 'App\Entity\Tag'` : une entree par tag existant,
+        // qui porte la valeur de chaque champ audite (le viewer la signale comme snapshot).
+        /** @var DoctrineProvider $provider */
+        $provider = $this->auditor->getProvider(DoctrineProvider::class);
+        new Snapshotter($provider)->snapshot(Tag::class);
+        // le snapshot lit les entites par lots et vide l'entity manager entre deux lots : recharger les tags
+        $tags = $manager->getRepository(Tag::class)->findBy([], ['id' => 'ASC']);
+
+        // ====================================================================
+        // LOT 1 -- Utilisateurs (3) + Auteurs (15)  18 inserts
         // ====================================================================
 
         foreach ([
@@ -59,31 +113,7 @@ class AppFixtures extends Fixture
             $authors[] = $author;
         }
 
-        $tags = [];
-        foreach ([
-            ['php',            '#8b5cf6'],
-            ['symfony',        '#3b82f6'],
-            ['doctrine',       '#10b981'],
-            ['auditor',        '#f59e0b'],
-            ['best-practices', '#ef4444'],
-            ['security',       '#dc2626'],
-            ['performance',    '#16a34a'],
-            ['testing',        '#9333ea'],
-            ['api-design',     '#0891b2'],
-            ['ddd',            '#b45309'],
-            ['architecture',   '#1d4ed8'],
-            ['devops',         '#475569'],
-            ['javascript',     '#ca8a04'],
-            ['database',       '#0f766e'],
-            ['clean-code',     '#be185d'],
-        ] as [$name, $color]) {
-            $tag = new Tag();
-            $tag->setName($name)->setColor($color);
-            $manager->persist($tag);
-            $tags[] = $tag;
-        }
-
-        $manager->flush(); // LOT 1 : 33 inserts
+        $manager->flush(); // LOT 1 : 18 inserts (User n'est pas audite : 15 entrees)
 
         // ====================================================================
         // LOT 2 -- Posts batch A : 30 brouillons (sans auteur, sans tags)
@@ -94,7 +124,7 @@ class AppFixtures extends Fixture
             $post = new Post();
             $post->setTitle($faker->sentence(random_int(5, 9)))
                  ->setBody(implode("\n\n", $faker->paragraphs(random_int(3, 6))))
-                 ->setStatus('draft');
+                 ->setStatus(PostStatus::Draft);
             $manager->persist($post);
             $posts[] = $post;
         }
@@ -109,7 +139,7 @@ class AppFixtures extends Fixture
             $post = new Post();
             $post->setTitle($faker->sentence(random_int(5, 9)))
                  ->setBody(implode("\n\n", $faker->paragraphs(random_int(3, 6))))
-                 ->setStatus('draft');
+                 ->setStatus(PostStatus::Draft);
             $manager->persist($post);
             $posts[] = $post;
         }
@@ -192,27 +222,34 @@ class AppFixtures extends Fixture
         $manager->flush(); // LOT 8 : ~100 inserts
 
         // ====================================================================
-        // LOT 9 -- Commentaires sur posts[40..59]  (4-6 par post, ~100 inserts)
+        // LOT 9 -- Commentaires importes sur posts[40..59]  (contexte de blame « import »)
         // ====================================================================
 
-        foreach (array_slice($posts, 40, 20) as $post) {
-            for ($c = 0; $c < random_int(4, 6); $c++) {
-                $comment = new Comment();
-                $comment->setPost($post)
-                        ->setAuthorName($faker->name())
-                        ->setBody($faker->paragraph(random_int(2, 4)));
-                $manager->persist($comment);
-            }
-        }
+        // Ces commentaires viennent d'un import : chaque entree d'audit porte le contexte
+        // {"via": {"type": "import", "label": "Import batch #1", ...}} et le viewer affiche « via import ».
+        $this->blameContextStack->run(
+            new BlameContext('import', 'Import batch #1', ['file' => 'legacy-comments.csv']),
+            static function () use ($posts, $faker, $manager): void {
+                foreach (array_slice($posts, 40, 20) as $post) {
+                    for ($c = 0; $c < random_int(4, 6); $c++) {
+                        $comment = new Comment();
+                        $comment->setPost($post)
+                                ->setAuthorName($faker->name())
+                                ->setBody($faker->paragraph(random_int(2, 4)));
+                        $manager->persist($comment);
+                    }
+                }
 
-        $manager->flush(); // LOT 9 : ~100 inserts
+                $manager->flush(); // LOT 9 : ~100 inserts
+            },
+        );
 
         // ====================================================================
         // LOT 10 -- Publication de posts[0..39] + ajout d'extraits (40 updates)
         // ====================================================================
 
         foreach (array_slice($posts, 0, 40) as $post) {
-            $post->setStatus('published')
+            $post->setStatus(PostStatus::Published)
                  ->setExcerpt($faker->sentence(random_int(15, 25)));
         }
 
@@ -274,5 +311,17 @@ class AppFixtures extends Fixture
         }
 
         $manager->flush(); // LOT 14 : ~10 dissociate + ~4 remove
+
+        // ====================================================================
+        // LOT 15 -- Archivage de posts[0..4] (enum PostStatus) + couleur d'un tag
+        //           (#[DiffLabel] : « changed Colour: Violet → Purple »)  6 updates
+        // ====================================================================
+
+        foreach (array_slice($posts, 0, 5) as $post) {
+            $post->setStatus(PostStatus::Archived);
+        }
+        $tags[0]->setColor('#9333ea');
+
+        $manager->flush(); // LOT 15 : 6 updates
     }
 }

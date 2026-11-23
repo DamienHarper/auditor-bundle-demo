@@ -11,6 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[Audit\Auditable]
+// The entries of a post also belong to the history of its main author.
+#[Audit\AuditRoot('author')]
 class Post
 {
     #[ORM\Id]
@@ -27,8 +29,8 @@ class Post
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $excerpt = null;
 
-    #[ORM\Column(length: 20)]
-    private ?string $status = 'draft';
+    #[ORM\Column(length: 20, enumType: PostStatus::class)]
+    private PostStatus $status = PostStatus::Draft;
 
     #[Audit\Ignore]
     #[ORM\Column]
@@ -99,12 +101,12 @@ class Post
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): PostStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(PostStatus $status): static
     {
         $this->status = $status;
 
@@ -113,7 +115,7 @@ class Post
 
     public function isPublished(): bool
     {
-        return $this->status === 'published';
+        return PostStatus::Published === $this->status;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable

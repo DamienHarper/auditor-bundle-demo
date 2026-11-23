@@ -2,6 +2,11 @@
 
 {% block title %}{{ post.title }} — AuditorBundle Demo{% endblock %}
 
+{% block stylesheets %}
+    {# the DhAuditor:History component is styled with the Tailwind classes of the viewer #}
+    <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
+{% endblock %}
+
 {% block body %}
 <a href="{{ path('app_post_index') }}" class="back-link">← All Posts</a>
 
@@ -22,7 +27,7 @@
                                 <span>by <a href="{{ path('app_author_show', {id: post.author.id}) }}" class="text-primary" style="font-weight:500">{{ post.author.name }}</a>
                                 {% if post.coauthor %} &amp; <a href="{{ path('app_author_show', {id: post.coauthor.id}) }}" class="text-primary" style="font-weight:500">{{ post.coauthor.name }}</a>{% endif %}</span>
                             {% endif %}
-                            <span class="badge badge-status-{{ post.status }}">{{ post.status }}</span>
+                            <span class="badge badge-status-{{ post.status.value }}">{{ post.status.label }}</span>
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -81,17 +86,15 @@
                 {{ form_end(comment_form) }}
             </div>
         </div>
+
+        {# History of the post and of its comments (#[AuditRoot('post')] on Comment), told as phrases #}
+        <twig:DhAuditor:History :subject="post" details="ROLE_ADMIN">
+            <twig:block name="title">History of this post</twig:block>
+        </twig:DhAuditor:History>
     </div>
 
     <div>
-        <div class="card">
-            <div class="card-header">Audit Trail</div>
-            <div class="card-body">
-                <a href="{{ path('dh_auditor_show_entity_stream', {entity: 'App-Entity-Post', id: post.id}) }}" class="btn btn-secondary" style="width:100%;justify-content:center">
-                    View full audit history →
-                </a>
-            </div>
-        </div>
+        {{ include('_partials/last_changes.html.twig', {subject: post, fields: ['title', 'status', 'author', 'body']}) }}
     </div>
 </div>
 {% endblock %}

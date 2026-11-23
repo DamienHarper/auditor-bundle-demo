@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Audit\TagColorLabelResolver;
 use App\Repository\TagRepository;
 use DH\Auditor\Attribute as Audit;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -21,6 +22,7 @@ class Tag
     private ?string $name = null;
 
     #[ORM\Column(length: 7)]
+    #[Audit\DiffLabel(resolver: TagColorLabelResolver::class)]
     private ?string $color = null;
 
     #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: 'tags')]

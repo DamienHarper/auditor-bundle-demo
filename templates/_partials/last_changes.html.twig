@@ -1,0 +1,23 @@
+{#- Who changed each field last: dh_auditor_last_changes(subject, fields).
+    For a field never changed since, the change is the creation (or the snapshot) of the object.
+    Variables: subject (an audited entity), fields (list of property names). -#}
+<div class="card">
+    <div class="card-header">Last changes</div>
+    <div class="card-body space-y-3">
+        {% for field, change in dh_auditor_last_changes(subject, fields) %}
+            <div>
+                <div style="font-size:.8rem;font-weight:600;color:var(--text-heading)">{{ dh_auditor_field_label(subject, field) }}</div>
+                {% if change %}
+                    {% set author = dh_auditor_history_item(change.entry)|dh_auditor_author %}
+                    {% set verb = change.kind.value in ['created', 'snapshot'] ? (change.kind.value == 'snapshot' ? 'recorded' : 'set at creation') : 'changed' %}
+                    <p class="text-muted" style="font-size:.75rem;margin:.1rem 0 0">
+                        {{ verb }} by <strong>{{ author }}</strong>,
+                        <a href="{{ dh_auditor_transaction_url(change.entry.transactionId) }}" class="text-primary" target="_blank" title="{{ change.entry.createdAt|date('Y-m-d H:i:s') }}">{{ change.entry.createdAt|time_ago }}</a>
+                    </p>
+                {% else %}
+                    <p class="text-muted" style="font-size:.75rem;margin:.1rem 0 0">no audit entry</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>

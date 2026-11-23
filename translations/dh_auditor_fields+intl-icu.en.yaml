@@ -1,0 +1,10 @@
+# Labels of the entities and fields in the histories (<twig:DhAuditor:History>, /history, the viewer phrases).
+# A field without a label is humanized ("authorName" gives "Author name").
+App\Entity\Post: '{count, plural, one {post} other {posts}}'
+App\Entity\Post.coauthor: Co-author
+App\Entity\Post.excerpt: Summary
+App\Entity\Author: '{count, plural, one {author} other {authors}}'
+App\Entity\Comment: '{count, plural, one {comment} other {comments}}'
+App\Entity\Comment.authorName: Commenter
+App\Entity\Tag: '{count, plural, one {tag} other {tags}}'
+App\Entity\Tag.color: Colour

@@ -25,6 +25,7 @@
         "symfony/runtime": "8.1.*",
         "symfony/security-bundle": "8.1.*",
         "symfony/twig-bundle": "8.1.*",
+        "symfony/ux-twig-component": "^3.8",
         "symfony/validator": "8.1.*",
         "symfony/yaml": "8.1.*",
         "twig/extra-bundle": "^3.0",

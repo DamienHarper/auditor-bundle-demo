@@ -35,7 +35,7 @@
                         <td class="text-muted" style="font-size:.875rem">
                             {{ post.author ? post.author.name : '—' }}
                         </td>
-                        <td><span class="badge badge-status-{{ post.status }}">{{ post.status }}</span></td>
+                        <td><span class="badge badge-status-{{ post.status.value }}">{{ post.status.label }}</span></td>
                         <td>
                             <div class="flex flex-wrap gap-1">
                                 {% for tag in post.tags %}
