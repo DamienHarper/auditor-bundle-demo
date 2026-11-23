@@ -32,7 +32,20 @@ dh_auditor:
             # utf8_convert: false            # legacy mb_convert_encoding() pass (opt-in)
 
             # Auditable entities are declared with #[Audit\Auditable]; YAML can declare them too
-            # and add per-entity options:
+            # and add per-entity options. The demo only restricts who can read the audits: the post and
+            # author pages are public, their history (<twig:DhAuditor:History>, dh_auditor_last_changes())
+            # is shown to signed-in users only, as the viewer and /history are.
+            entities:
+                App\Entity\Author:
+                    roles: { view: [ROLE_USER] }
+                App\Entity\Post:
+                    roles: { view: [ROLE_USER] }
+                App\Entity\Comment:
+                    roles: { view: [ROLE_USER] }
+                App\Entity\Tag:
+                    roles: { view: [ROLE_USER] }
+
+            # Other per-entity options:
             # entities:
             #     App\Entity\Post:
             #         roots: [author]          # same as #[Audit\AuditRoot('author')]

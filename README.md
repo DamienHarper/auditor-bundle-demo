@@ -50,6 +50,7 @@ From an earlier 8.x-dev demo, `audit:schema:update --force` adds the `audit_root
 | **Blame context** — `BlameContextStack::run(new BlameContext('import', …))` in the fixtures; the automatic `console` context of commands | "via import · Import batch #1" / "via console · app:fixtures:load" badges |
 | **Snapshot** — tags created with auditing disabled, then `Snapshotter` (what `audit:snapshot` runs) | "recorded the initial state of 15 tags" in `/audit/App-Entity-Tag` |
 | **Custom journal** — `HistoryGrouper::byTransaction()` + the `HistoryRows` of the viewer | `/history`: one line per transaction across the four audit tables |
+| **Read access** — `roles: { view: [ROLE_USER] }` on every entity in `dh_auditor.yaml`, `dh_auditor_is_viewable()` in the templates | The post and author pages are public; their history and last changes are shown to signed-in users only |
 
 ## URLs
 

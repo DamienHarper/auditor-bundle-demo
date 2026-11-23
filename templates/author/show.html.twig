@@ -60,8 +60,12 @@
 {# History of the author, of their posts (#[AuditRoot('author')] on Post) and of the comments on them
    (#[AuditRoot('post.author')] on Comment) #}
 <div style="margin-top:1.5rem">
-    <twig:DhAuditor:History :subject="author" :limit="40">
-        <twig:block name="title">History of {{ author.name }} and their posts</twig:block>
-    </twig:DhAuditor:History>
+    {% if dh_auditor_is_viewable(author) %}
+        <twig:DhAuditor:History :subject="author" :limit="40">
+            <twig:block name="title">History of {{ author.name }} and their posts</twig:block>
+        </twig:DhAuditor:History>
+    {% else %}
+        {{ include('_partials/audit_sign_in.html.twig', {title: 'History of ' ~ author.name ~ ' and their posts'}) }}
+    {% endif %}
 </div>
 {% endblock %}

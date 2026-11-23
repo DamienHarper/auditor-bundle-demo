@@ -88,9 +88,13 @@
         </div>
 
         {# History of the post and of its comments (#[AuditRoot('post')] on Comment), told as phrases #}
-        <twig:DhAuditor:History :subject="post" details="ROLE_ADMIN">
-            <twig:block name="title">History of this post</twig:block>
-        </twig:DhAuditor:History>
+        {% if dh_auditor_is_viewable(post) %}
+            <twig:DhAuditor:History :subject="post" details="ROLE_ADMIN">
+                <twig:block name="title">History of this post</twig:block>
+            </twig:DhAuditor:History>
+        {% else %}
+            {{ include('_partials/audit_sign_in.html.twig', {title: 'History of this post'}) }}
+        {% endif %}
     </div>
 
     <div>

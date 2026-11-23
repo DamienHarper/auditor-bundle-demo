@@ -1,6 +1,9 @@
 {#- Who changed each field last: dh_auditor_last_changes(subject, fields).
     For a field never changed since, the change is the creation (or the snapshot) of the object.
     Variables: subject (an audited entity), fields (list of property names). -#}
+{% if not dh_auditor_is_viewable(subject) %}
+    {{ include('_partials/audit_sign_in.html.twig', {title: 'Last changes'}) }}
+{% else %}
 <div class="card">
     <div class="card-header">Last changes</div>
     <div class="card-body space-y-3">
@@ -21,3 +24,4 @@
         {% endfor %}
     </div>
 </div>
+{% endif %}
