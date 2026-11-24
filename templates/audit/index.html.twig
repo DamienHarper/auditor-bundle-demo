@@ -40,7 +40,7 @@
         <div class="card-body" style="padding-top:.25rem;padding-bottom:.25rem">
             <ul class="divide-y divide-slate-100 dark:divide-slate-800">
                 {% for row in rows %}
-                    {{ include('@DHAuditor/History/_row.html.twig', {row: row, date_format: 'datetime', shorten: 4, details: is_granted('ROLE_ADMIN')}) }}
+                    {{ include('@DHAuditor/History/_row.html.twig', {row: row, date_format: 'datetime', shorten: 2, details: is_granted('ROLE_ADMIN')}) }}
                 {% endfor %}
             </ul>
         </div>

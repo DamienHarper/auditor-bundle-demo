@@ -100,7 +100,10 @@
         *::-webkit-scrollbar { width: 5px; height: 5px; }
         *::-webkit-scrollbar-thumb { background: rgba(14,186,161,.3); border-radius: 3px; }
 
-        a { color: var(--color-primary); text-decoration: none; }
+        /* in the "base" layer: the classes of the bundle templates (phrases, viewer rows) style their own links */
+        @layer base {
+            a { color: var(--color-primary); text-decoration: none; }
+        }
 
         /* ============================================================
            LAYOUT UTILITIES
