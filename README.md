@@ -43,7 +43,7 @@ From an earlier 8.x-dev demo, `audit:schema:update --force` adds the `audit_root
 | **Audit roots** — `#[AuditRoot('author')]` on `Post`, `#[AuditRoot('post')]` and `#[AuditRoot('post.author')]` on `Comment` | The history of a post includes its comments; the history of an author includes their posts and the comments on them |
 | **`<twig:DhAuditor:History>`** — the history of an object in the pages of the application, told as phrases | `/posts/{id}`, `/authors/{id}` |
 | **Last change of a field** — `dh_auditor_last_changes()`, `dh_auditor_field_label()` | "Last changes" card of `/posts/{id}` and `/authors/{id}` |
-| **Phrases and labels** — `translations/dh_auditor_fields+intl-icu.en.yaml`, `translations/dh_auditor_history+intl-icu.en.yaml` | "moved “…” from Published to Archived", "tagged it php and symfony", "Summary" for `excerpt` |
+| **Phrases and labels** — `translations/dh_auditor_fields+intl-icu.en.yaml`, `translations/dh_auditor_history+intl-icu.en.yaml` | "moved “…” from Published to Archived", "tagged “…” with php and symfony", "Summary" for `excerpt` |
 | **Enum values** — `Post::$status` is a `PostStatus` enum implementing `TranslatableInterface` | Its label in the phrases ("Draft → Published") and the "status" icon |
 | **`#[DiffLabel]`** — `App\Audit\TagColorLabelResolver` on `Tag::$color` | "changed Colour: Violet → Purple" instead of hex codes |
 | **`entity_label_resolver`** — `App\Audit\EntityLabelResolver` | A comment is labelled "Jane Doe’s comment" in the diffs |
