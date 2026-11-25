@@ -65,7 +65,7 @@ class AuditController extends AbstractController
         usort($entries, static fn (Entry $a, Entry $b): int => strcmp($b->getSortKey(), $a->getSortKey()));
 
         // 3. One action per transaction, told as a phrase ("alice moved the post from Draft to Published").
-        $rows = $historyRows->build(HistoryGrouper::byTransaction($entries), withContext: true);
+        $rows = $historyRows->build(HistoryGrouper::byTransaction($entries));
 
         return $this->render('audit/index.html.twig', [
             'rows' => $rows,
