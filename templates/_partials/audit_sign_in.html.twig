@@ -1,0 +1,10 @@
+{#- Shown instead of the history of an object to a reader not granted the "view" role of its audits
+    (roles.view in config/packages/dh_auditor.yaml). Variables: title. -#}
+<div class="card">
+    <div class="card-header">{{ title }}</div>
+    <div class="card-body">
+        <p class="text-muted" style="font-size:.875rem;margin:0">
+            <a href="{{ path('app_login') }}" class="text-primary" style="font-weight:500">Sign in</a> to see who changed what.
+        </p>
+    </div>
+</div>

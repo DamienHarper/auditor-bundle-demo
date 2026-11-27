@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Author;
 use App\Form\AuthorType;
 use App\Repository\AuthorRepository;
-use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,23 +44,11 @@ class AuthorController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_author_show', methods: ['GET'])]
-    public function show(Author $author, Reader $reader): Response
+    public function show(Author $author): Response
     {
-        $audits = [];
-        try {
-            $query = $reader->createQuery(Author::class, [
-                'object_id' => (string) $author->getId(),
-                'page' => 1,
-                'page_size' => 10,
-            ]);
-            $pager = $reader->paginate($query, 1, 10);
-            $audits = iterator_to_array($pager['results']);
-        } catch (\Throwable) {
-        }
-
+        // The history comes from <twig:DhAuditor:History> in the template.
         return $this->render('author/show.html.twig', [
             'author' => $author,
-            'audits' => $audits,
         ]);
     }
 

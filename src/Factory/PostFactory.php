@@ -3,6 +3,7 @@
 namespace App\Factory;
 
 use App\Entity\Post;
+use App\Entity\PostStatus;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 
 /**
@@ -23,7 +24,7 @@ final class PostFactory extends PersistentProxyObjectFactory
             'title'   => $faker->sentence(random_int(5, 10)),
             'body'    => implode("\n\n", $faker->paragraphs(random_int(3, 6))),
             'excerpt' => null,
-            'status'  => 'draft',
+            'status'  => PostStatus::Draft,
         ];
     }
 

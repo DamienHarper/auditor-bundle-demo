@@ -8,6 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentRepository::class)]
 #[Audit\Auditable]
+// The entries of a comment belong to the history of its post (and of the author of that post).
+#[Audit\AuditRoot('post')]
+#[Audit\AuditRoot('post.author')]
 class Comment
 {
     #[ORM\Id]

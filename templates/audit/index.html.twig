@@ -2,11 +2,16 @@
 
 {% block title %}Audit History — AuditorBundle Demo{% endblock %}
 
+{% block stylesheets %}
+    {# the rows of the viewer are styled with its Tailwind classes #}
+    <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
+{% endblock %}
+
 {% block body %}
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="page-title">Audit History</h1>
-        <p class="page-subtitle">{{ total }} entr{% if total != 1 %}ies{% else %}y{% endif %} total</p>
+        <p class="page-subtitle">Every action on the blog, one line per transaction, told as a phrase</p>
     </div>
     <a href="{{ path('dh_auditor_list_audits') }}" class="btn btn-secondary btn-sm" target="_blank">Native viewer →</a>
 </div>
@@ -19,97 +24,37 @@
             <option value="{{ entity }}" {% if entity_filter == entity %}selected{% endif %}>{{ entity }}</option>
         {% endfor %}
     </select>
-    <select name="type" class="form-select" style="width:auto">
-        <option value="">All types</option>
-        {% for type in audit_types %}
-            <option value="{{ type }}" {% if type_filter == type %}selected{% endif %}>{{ type }}</option>
-        {% endfor %}
-    </select>
     <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    {% if entity_filter or type_filter %}
+    {% if entity_filter %}
         <a href="{{ path('app_audit_history') }}" class="btn btn-ghost btn-sm">Clear</a>
     {% endif %}
 </form>
 
-{% if entries is empty %}
+{% if rows is empty %}
     <div class="card empty-state">
         <p>No audit entries found.</p>
-        <p style="font-size:.8rem;color:var(--text-subtle);margin-top:.5rem">Run <span class="code-inline">bin/console doctrine:fixtures:load</span> to generate data.</p>
+        <p style="font-size:.8rem;color:var(--text-subtle);margin-top:.5rem">Run <span class="code-inline">bin/console app:fixtures:load</span> to generate data.</p>
     </div>
 {% else %}
     <div class="card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Type</th>
-                    <th>Entity</th>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Transaction</th>
-                    <th>Changed fields</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in entries %}
-                    {% set entry = row.entry %}
-                    <tr>
-                        <td class="whitespace-nowrap" style="font-size:.8rem;color:var(--text-muted)">
-                            {{ entry.createdAt ? entry.createdAt|date('Y-m-d H:i:s') : '—' }}
-                        </td>
-                        <td class="whitespace-nowrap">
-                            {% include '_partials/audit_badge.html.twig' with {type: entry.type} %}
-                        </td>
-                        <td>
-                            <span class="badge badge-entity">{{ row.entity }}</span>
-                        </td>
-                        <td style="font-size:.8rem;color:var(--text-muted)">#{{ entry.objectId }}</td>
-                        <td style="font-size:.8rem;color:var(--text-muted)">{{ entry.username ?? '—' }}</td>
-                        <td>
-                            {% if entry.transactionId %}
-                                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionId}) }}" class="tx-link" title="{{ entry.transactionId }}">
-                                    …{{ entry.transactionId|slice(-8) }}
-                                </a>
-                            {% else %}
-                                <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td style="max-width:220px">
-                            {% set diffs = entry.getDiffs() %}
-                            {% if diffs is not empty %}
-                                <div class="flex flex-wrap gap-1">
-                                    {% for field, diff in diffs %}
-                                        {% if diff is iterable %}
-                                            {% set raw_old = diff.old ?? null %}
-                                            {% set raw_new = diff.new ?? null %}
-                                            {% set old_val = (raw_old is iterable) ? raw_old|json_encode : (raw_old ?? '') %}
-                                            {% set new_val = (raw_new is iterable) ? raw_new|json_encode : (raw_new ?? '') %}
-                                            <span class="badge badge-entity" title="{{ field }}: {{ old_val }} → {{ new_val }}">{{ field }}</span>
-                                        {% else %}
-                                            <span class="badge badge-entity" title="{{ field }}: {{ diff }}">{{ field }}</span>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <span class="text-muted" style="font-size:.8rem">—</span>
-                            {% endif %}
-                        </td>
-                    </tr>
+        <div class="card-body" style="padding-top:.25rem;padding-bottom:.25rem">
+            <ul class="divide-y divide-slate-100 dark:divide-slate-800">
+                {% for row in rows %}
+                    {{ include('@DHAuditor/History/_row.html.twig', {row: row, date_format: 'datetime', shorten: 2, details: is_granted('ROLE_ADMIN')}) }}
                 {% endfor %}
-            </tbody>
-        </table>
+            </ul>
+        </div>
     </div>
 
-    {# Pagination #}
-    {% if num_pages > 1 %}
+    {% if has_previous or has_next %}
         <div class="flex items-center justify-between" style="margin-top:1.5rem">
-            <p class="text-muted" style="font-size:.875rem">Page {{ current_page }} of {{ num_pages }}</p>
+            <p class="text-muted" style="font-size:.875rem">Page {{ current_page }}</p>
             <div class="flex gap-2">
                 {% if has_previous %}
-                    <a href="{{ path('app_audit_history', {page: current_page - 1, entity: entity_filter, type: type_filter}) }}" class="btn btn-secondary btn-sm">← Previous</a>
+                    <a href="{{ path('app_audit_history', {page: current_page - 1, entity: entity_filter}) }}" class="btn btn-secondary btn-sm">← Newer</a>
                 {% endif %}
                 {% if has_next %}
-                    <a href="{{ path('app_audit_history', {page: current_page + 1, entity: entity_filter, type: type_filter}) }}" class="btn btn-secondary btn-sm">Next →</a>
+                    <a href="{{ path('app_audit_history', {page: current_page + 1, entity: entity_filter}) }}" class="btn btn-secondary btn-sm">Older →</a>
                 {% endif %}
             </div>
         </div>

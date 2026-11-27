@@ -4,10 +4,11 @@ namespace App\Form;
 
 use App\Entity\Author;
 use App\Entity\Post;
+use App\Entity\PostStatus;
 use App\Entity\Tag;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -33,9 +34,10 @@ class PostType extends AbstractType
                 'label' => 'Body',
                 'attr' => ['class' => $inputClass, 'rows' => 8],
             ])
-            ->add('status', ChoiceType::class, [
+            ->add('status', EnumType::class, [
                 'label' => 'Status',
-                'choices' => ['Draft' => 'draft', 'Published' => 'published'],
+                'class' => PostStatus::class,
+                'choice_label' => static fn (PostStatus $status): string => $status->label(),
                 'attr' => ['class' => $inputClass],
             ])
             ->add('author', EntityType::class, [

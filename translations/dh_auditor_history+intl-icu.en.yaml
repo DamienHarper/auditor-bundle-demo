@@ -1,0 +1,13 @@
+# Phrases of the histories, keyed by FQCN.kind (created, snapshot, deleted) or FQCN.field.kind
+# (set, changed, cleared, added, removed, json); ".bulk" for the summary of more than 5 objects.
+# Anything not listed here keeps the neutral phrase of the bundle.
+App\Entity\Post.created: 'drafted the post “{label}”'
+App\Entity\Post.status.changed: 'moved “{label}” from {old} to {new}'
+App\Entity\Post.tags.added: 'tagged “{label}” with {names}'
+App\Entity\Post.tags.removed: 'untagged {names} from “{label}”'
+App\Entity\Post.author.set: 'assigned {new} as author'
+App\Entity\Post.coauthor.set: 'invited {new} as co-author'
+App\Entity\Comment.created: 'posted {label}'
+App\Entity\Comment.deleted: 'deleted {label}'
+App\Entity\Comment.deleted.bulk: 'deleted {count} {entity}'
+App\Entity\Tag.snapshot: 'recorded the existing tag “{label}”'
