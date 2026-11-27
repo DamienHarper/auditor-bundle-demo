@@ -1,12 +1,12 @@
 # auditor-bundle Demo
 
-A demo application showcasing **[damienharper/auditor-bundle](https://github.com/DamienHarper/auditor-bundle) v8** with Symfony 8.1, running the latest unreleased development branches of the auditor family.
+A demo application showcasing **[damienharper/auditor-bundle](https://github.com/DamienHarper/auditor-bundle) v8** with Symfony 8.1, running the 5.0 / 2.0 / 8.0 releases of the auditor family.
 
 ## Stack
 
 - PHP 8.4+ (with `ext-intl`) / Symfony 8.1
 - Doctrine ORM 3.8+ / DBAL 4.6+
-- auditor `5.x-dev`, auditor-doctrine-provider `2.x-dev`, auditor-bundle `8.x-dev` (development branches, not yet released)
+- auditor `^5.0`, auditor-doctrine-provider `^2.0`, auditor-bundle `^8.0`
 - `symfony/ux-twig-component` for the `<twig:DhAuditor:History>` component
 - SQLite (single file)
 
